@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
                        DESC
   s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
   s.license          = 'Copyright MBSJ LLC'
-  s.source           = { :git => "git@bitbucket.org:arclight/eventtracker-ios.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://bitbucket.org/arclight/eventtracker-ios.git", :tag => s.version.to_s }
   s.author           = { "Arclight" => "Arclight" }
 
   s.platform     = :ios, '6.0'
