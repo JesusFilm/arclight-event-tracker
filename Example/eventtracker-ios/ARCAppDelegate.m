@@ -2,17 +2,40 @@
 //  ARCAppDelegate.m
 //  eventtracker-ios
 //
-//  Created by CocoaPods on 10/08/2014.
-//  Copyright (c) 2014 Charlie Fulton. All rights reserved.
 //
 
 #import "ARCAppDelegate.h"
+#import "EventTracker.h"
 
 @implementation ARCAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    
+    // Override point for customization after application launch.
+    
+    
+    NSString *appVersionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    
+    
+    
+    // Initialzie tracker
+    [EventTracker initializeWithApiKey:@"50105546a541a8.91252593"
+                             appDomain:@"Engagement ios TEST APP"
+                               appName:@"Engagement ios TEST APP"
+                            appVersion:appVersionString];
+    
+    
+    // simulate play on launch
+    
+    // call new Arclight EventTracker service
+    [EventTracker trackPlayEventWithRefID:@"777"
+                             apiSessionID:@"111222333"
+                                streaming:YES
+                   mediaViewTimeInSeconds:10.0
+             mediaEngagementOver75Percent:YES];
+    
     return YES;
 }
 							

@@ -17,14 +17,12 @@ Pod::Spec.new do |s|
                        * Markdown format.
                        * Don't worry about the indent, we strip it!
                        DESC
-  s.homepage         = "https://github.com/<GITHUB_USERNAME>/eventtracker-ios"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
-  s.license          = 'MIT'
-  s.author           = { "Charlie Fulton" => "charliefulton@gmail.com" }
-  s.source           = { :git => "https://github.com/<GITHUB_USERNAME>/eventtracker-ios.git", :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
+  s.license          = 'Copyright MBSJ LLC'
+  s.source           = { :git => "git@bitbucket.org:arclight/eventtracker-ios.git", :tag => s.version.to_s }
 
-  s.platform     = :ios, '7.0'
+
+  s.platform     = :ios, '6.0'
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes'
@@ -33,6 +31,7 @@ Pod::Spec.new do |s|
   }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  s.frameworks = 'UIKit', 'MapKit', 'CoreData'
+  s.dependency 'sqlite3'
+
 end

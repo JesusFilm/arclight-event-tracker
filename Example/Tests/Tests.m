@@ -2,8 +2,6 @@
 //  eventtracker-iosTests.m
 //  eventtracker-iosTests
 //
-//  Created by Charlie Fulton on 10/08/2014.
-//  Copyright (c) 2014 Charlie Fulton. All rights reserved.
 //
 
 SpecBegin(InitialSpecs)
