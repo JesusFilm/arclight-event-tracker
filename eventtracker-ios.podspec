@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "eventtracker-ios"
-  s.version          = "0.1.2"
+  s.version          = "0.1.4"
   s.summary          = "A short description of eventtracker-ios."
   s.description      = <<-DESC
                        An optional longer description of eventtracker-ios
