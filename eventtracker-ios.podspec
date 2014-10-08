@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "eventtracker-ios"
-  s.version          = "0.1.1"
+  s.version          = "0.1.2"
   s.summary          = "A short description of eventtracker-ios."
   s.description      = <<-DESC
                        An optional longer description of eventtracker-ios
@@ -20,7 +20,7 @@ Pod::Spec.new do |s|
   s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
   s.license          = 'Copyright MBSJ LLC'
   s.source           = { :git => "git@bitbucket.org:arclight/eventtracker-ios.git", :tag => s.version.to_s }
-
+  s.author           = { "Arclight" => "Arclight" }
 
   s.platform     = :ios, '6.0'
   s.requires_arc = true
