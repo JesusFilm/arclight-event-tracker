@@ -98,6 +98,8 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 //            NSString *strResponse = [[NSString alloc] initWithData:data
 //                                                          encoding:NSUTF8StringEncoding];
             
+
+            
             if (httpResp.statusCode == 200)
             {
                 NSError *jsonResponseError = nil;
@@ -257,7 +259,8 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     
     NSString *deviceFamily = kDeviceFamily;
     NSString *deviceName = [[UIDevice currentDevice] name];
-    NSString *deviceOS = [NSString stringWithFormat:@"%@ %@",[[UIDevice currentDevice] systemName], [[UIDevice currentDevice] systemVersion]];
+    NSString *deviceOS = [NSString stringWithFormat:@"%@ %@",@"iOS",
+                          [[UIDevice currentDevice] systemVersion]];
     NSString *domain = [[EventTracker sharedInstance] appDomain];
     NSString *appName = [[EventTracker sharedInstance] appName];
     NSString *appVersion = [[EventTracker sharedInstance] appVersion];
