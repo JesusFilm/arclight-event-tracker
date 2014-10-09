@@ -9,14 +9,9 @@
 
 Pod::Spec.new do |s|
   s.name             = "eventtracker-ios"
-  s.version          = "0.1.4"
-  s.summary          = "A short description of eventtracker-ios."
-  s.description      = <<-DESC
-                       An optional longer description of eventtracker-ios
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
-                       DESC
+  s.version          = "1.8.0"
+  s.summary          = "Arclight engagement tracker for iOS"
+  s.description      = "Arclight engagement tracker for iOS"
   s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
   s.license          = 'Copyright MBSJ LLC'
   s.source           = { :git => "https://bitbucket.org/arclight/eventtracker-ios.git", :tag => s.version.to_s }
@@ -32,6 +27,6 @@ Pod::Spec.new do |s|
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'MapKit', 'CoreData'
-  s.dependency 'sqlite3'
+  #s.dependency 'sqlite3'
 
 end
