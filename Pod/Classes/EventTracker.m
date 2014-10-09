@@ -14,10 +14,17 @@
 #import <CoreLocation/CoreLocation.h>
 #import "Reachability.h"
 #import <dispatch/dispatch.h>
+#import <sys/utsname.h>
 
 // Constants
 // production
-#define kApiEndpoint @"https://analytics.arclight.org/VideoPlayEvent/"
+
+#ifdef DEBUG
+    #define kApiEndpoint @"http://jfm-oestage-env.elasticbeanstalk.com/VideoPlayEvent/"
+#else
+    #define kApiEndpoint @"https://analytics.arclight.org/VideoPlayEvent/"
+#endif
+
 #define kReachabilityHostName @"analytics.arclight.org"
 #define kType @"mobile"
 #define kDeviceFamily @"Apple"
@@ -258,7 +265,8 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     BOOL hasLocationData = latitude > 0 || longitude > 0;
     
     NSString *deviceFamily = kDeviceFamily;
-    NSString *deviceName = [[UIDevice currentDevice] name];
+    NSString *deviceName = machineName();
+    
     NSString *deviceOS = [NSString stringWithFormat:@"%@ %@",@"iOS",
                           [[UIDevice currentDevice] systemVersion]];
     NSString *domain = [[EventTracker sharedInstance] appDomain];
@@ -713,55 +721,16 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                 }
             }
         }
-
     });
+}
+
+NSString* machineName()
+{
+    struct utsname systemInfo;
+    uname(&systemInfo);
     
-//	// make sure we don't try to kick off another sync operation if one is in progress
-//	if (!self.syncing && self.webServicesAvailable)
-//	{
-//        NSArray *allEvents = [[EventTracker sharedInstance] getAllEvents:NO];
-//	
-//        if ([allEvents count] > 0)
-//        {
-//            self.syncing = YES;
-//
-//            NSLog(@"Attempting to sync %d events",(int)[allEvents count]);
-//            
-//            EventOperation *operation = [[EventOperation alloc] init];
-//            operation.events = allEvents;
-//            operation.block = ^(NSArray *events, NSError *error)
-//            {
-//                if(!error)
-//                {
-//                    
-//                    NSLog(@"deleting these events %@", events);
-//                    // Delete this group of events
-//                    for (Event *event in events)
-//                    {
-//                        [self removeEvent:event];
-//                    }
-//                }
-//                else
-//                {
-//                    if(events && events.count) // Unrecoverable error
-//                    {
-//                        for (Event *event in events)
-//                        {
-//                            [self removeEvent:event];
-//                        }
-//                    }
-//                    else
-//                    {
-//                        // Do nothing and ignore
-//                        NSLog(@"A recoverable error occured %@", error);
-//                    }
-//                }
-//                self.syncing = NO;
-//            };
-//            
-//            [self.operationQueue addOperation:operation];
-//        }
-//	}
+    return [NSString stringWithCString:systemInfo.machine
+                              encoding:NSUTF8StringEncoding];
 }
 
 @end
