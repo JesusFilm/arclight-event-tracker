@@ -22,6 +22,16 @@ To add the Private Repo to your CocoaPods installation, run the following:
 ## Install
 
 To install
-it, simply add the following line to your Podfile:
+it, simply add the following lines to your Podfile:
+
+at the top: 
+
+	source 'https://bitbucket.org/arclight/arclight-cocoa-pods'
+
+and with your other pods:
 
     pod "eventtracker-ios"
+
+also if you would like to keep eventtracker-ios updated you can simply include it like this in your podfile and "pod update" will always pull down the latest 1.8.x version. 
+
+	pod 'eventtracker-ios', '~> 1.8.3'
