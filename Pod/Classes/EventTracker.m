@@ -79,13 +79,9 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
         {
             NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
             NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-
-            NSLog(@"postData.body(JSON) == %@",jsonString);
             
             NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
 
-            NSLog(@"using url %@",url);
-            
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
             
             [request setHTTPMethod:@"POST"];
@@ -101,11 +97,6 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                                                  returningResponse:&response
                                                              error:&requestError];
             NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
-            
-//            NSString *strResponse = [[NSString alloc] initWithData:data
-//                                                          encoding:NSUTF8StringEncoding];
-            
-
             
             if (httpResp.statusCode == 200)
             {
@@ -125,8 +116,6 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                         webError = [NSError errorWithDomain:@"com.arclight.response" code:(long)httpResp.statusCode userInfo:@{}];
                     }
                 }
-                NSLog(@"response %@", json);
-
             }
             // TODO: Check valid failures
             else
@@ -245,7 +234,11 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     [[EventTracker sharedInstance] syncWithWeb:self];
 }
 
-+ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
++ (void) trackPlayEventWithRefID:(NSString *) refID
+                    apiSessionID:(NSString *) apiSessionID
+                       streaming:(BOOL) streaming
+          mediaViewTimeInSeconds:(float) seconds
+    mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
 {
     
     if(![[EventTracker sharedInstance] apiKey])
@@ -279,8 +272,8 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                                       @"type" : type,
                                       @"latitude" : [NSNumber numberWithFloat:latitude],
                                       @"longitude" : [NSNumber numberWithFloat:longitude],
-                                      @"refId" : refID,
-                                      @"apiSessionId" : apiSessionID,
+                                      @"refId" : refID ? refID : @"N/A",
+                                      @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
                                       @"deviceFamily" : deviceFamily,
                                       @"deviceName" : deviceName,
                                       @"deviceOs" : deviceOS,
