@@ -207,7 +207,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
         /*
          Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
          */
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kJFMReachabilityChangedNotification object:nil];
         
         // Determine current reachability status
         self.hostReachability = [JFMReachability reachabilityWithHostName:kReachabilityHostName];
