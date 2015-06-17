@@ -39,7 +39,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 /**
  * Defines our Event class to hold the event data.
  */
-@interface Event:NSObject
+@interface JFMEvent:NSObject
 @property(nonatomic) NSInteger event_id;
 @property(nonatomic) long timestamp;
 @property(nonatomic) BOOL hasLocationData;
@@ -47,7 +47,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 @property(nonatomic) BOOL synced;
 @end
 
-@implementation Event
+@implementation JFMEvent
 @end
 
 /**
@@ -65,7 +65,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     NSError *webError = nil;
     BOOL recoverable = NO;
     
-    for(Event *event in self.events)
+    for(JFMEvent *event in self.events)
     {
         NSError *jsonError;
         
@@ -285,7 +285,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                                       @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false"
                                       };
     
-    Event *event = [[Event alloc] init];
+    JFMEvent *event = [[JFMEvent alloc] init];
     event.hasLocationData = hasLocationData;
     event.event_id = 0;
     event.request = [eventDictionary mutableCopy];
@@ -429,7 +429,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  * @params the event object to be inserted
  * @return boolean as to whether or not the request completed
  */
-- (BOOL) insertEvent:(Event *) event
+- (BOOL) insertEvent:(JFMEvent *) event
 {
     // Convert the dictionary to a JSON string
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:event.request
@@ -448,7 +448,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  * @params event the event object ot be updated
  * @return boolean as to whether or not the request completed
  */
-- (BOOL) updateEvent:(Event *) event
+- (BOOL) updateEvent:(JFMEvent *) event
 {
     // Convert the dictionary to a JSON string
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:event.request
@@ -463,7 +463,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  * Removes a successfully sync'ed event from database
  *
  */
-- (BOOL) removeEvent:(Event *)event
+- (BOOL) removeEvent:(JFMEvent *)event
 {
     NSString *sql = [NSString stringWithFormat:@"delete from events where id = %d ",(int)event.event_id];
     return [self queryDatabase:sql];
@@ -477,7 +477,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 {
     NSArray *events = [self getAllEvents:YES];
     
-    for (Event *event in events)
+    for (JFMEvent *event in events)
     {
         NSMutableDictionary *request = event.request;
         request[@"latitude"] = [NSNumber numberWithFloat:self.latitude];
@@ -523,7 +523,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                char *request_char = (char *) sqlite3_column_text(statement, 3);
                NSString *request = [[NSString alloc] initWithUTF8String:request_char];
                
-               Event *event = [[Event alloc] init];
+               JFMEvent *event = [[JFMEvent alloc] init];
                event.event_id = uniqueId;
                event.timestamp = timestamp;
                event.hasLocationData = has_location_data;
@@ -602,7 +602,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
             NSError *webError = nil;
             BOOL recoverable = NO;
             
-            for(Event *event in events)
+            for(JFMEvent *event in events)
             {
                 NSError *jsonError;
                 
@@ -693,7 +693,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                 
                 NSLog(@"deleting these events %@", events);
                 // Delete this group of events
-                for (Event *event in events)
+                for (JFMEvent *event in events)
                 {
                     [self removeEvent:event];
                 }
@@ -702,7 +702,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
             {
                 if(events && events.count && !recoverable) // Unrecoverable error
                 {
-                    for (Event *event in events)
+                    for (JFMEvent *event in events)
                     {
                         [self removeEvent:event];
                     }
