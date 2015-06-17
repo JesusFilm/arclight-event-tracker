@@ -12,7 +12,7 @@
 #import "EventTracker.h"
 #import <sqlite3.h>
 #import <CoreLocation/CoreLocation.h>
-#import "Reachability.h"
+#import "JFMReachability.h"
 #import <dispatch/dispatch.h>
 #import <sys/utsname.h>
 
@@ -178,7 +178,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 @property(assign) BOOL syncing;
 @property(nonatomic, strong) NSOperationQueue *operationQueue;
 @property(assign) BOOL webServicesAvailable;
-@property(nonatomic, strong) Reachability *hostReachability;
+@property(nonatomic, strong) JFMReachability *hostReachability;
 @end
 
 @implementation EventTracker
@@ -210,7 +210,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
         
         // Determine current reachability status
-        self.hostReachability = [Reachability reachabilityWithHostName:kReachabilityHostName];
+        self.hostReachability = [JFMReachability reachabilityWithHostName:kReachabilityHostName];
         // Monitor reachability events
         [self.hostReachability startNotifier];
         [self updateInterfaceWithReachability:self.hostReachability];
@@ -358,12 +358,12 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  */
 - (void) reachabilityChanged:(NSNotification *)note
 {
-	Reachability* curReach = [note object];
-	NSParameterAssert([curReach isKindOfClass:[Reachability class]]);
+	JFMReachability* curReach = [note object];
+	NSParameterAssert([curReach isKindOfClass:[JFMReachability class]]);
 	[self updateInterfaceWithReachability:curReach];
 }
 
-- (void)updateInterfaceWithReachability:(Reachability *)reachability
+- (void)updateInterfaceWithReachability:(JFMReachability *)reachability
 {
     if (reachability == self.hostReachability)
 	{
