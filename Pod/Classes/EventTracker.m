@@ -20,7 +20,7 @@
 // production
 
 #ifdef DEBUG
-    #define kApiEndpoint @"http://jfm-oestage-env.elasticbeanstalk.com/VideoPlayEvent/"
+    #define kApiEndpoint @"https://staging-analytics.arclight.org/"
 #else
     #define kApiEndpoint @"https://analytics.arclight.org/VideoPlayEvent/"
 #endif
