@@ -593,7 +593,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 
 - (void) syncWithWeb:(id) sender
 {
-    
+    __block EventTracker *weakSelf = self;
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^(void){
         NSArray *events = [[EventTracker sharedInstance] getAllEvents:NO];
         
@@ -639,8 +639,11 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                                                                      error:&requestError];
                     NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
                     
-//                    NSString *strResponse = [[NSString alloc] initWithData:data
-//                                                                  encoding:NSUTF8StringEncoding];
+                    NSString *strResponse = [[NSString alloc] initWithData:data
+                                                                  encoding:NSUTF8StringEncoding];
+
+                    NSLog(@"response code == %d",(int)httpResp.statusCode);
+                    NSLog(@"strResponse == %@", strResponse);
                     
                     if (httpResp.statusCode == 200)
                     {
@@ -695,7 +698,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                 // Delete this group of events
                 for (JFMEvent *event in events)
                 {
-                    [self removeEvent:event];
+                    [weakSelf removeEvent:event];
                 }
             }
             else
@@ -704,7 +707,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                 {
                     for (JFMEvent *event in events)
                     {
-                        [self removeEvent:event];
+                        [weakSelf removeEvent:event];
                     }
                 }
                 else
