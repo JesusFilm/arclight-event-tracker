@@ -398,16 +398,17 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
             sqlite3_prepare_v2(self.database, stmt,-1, &statement, NULL);
             if (sqlite3_step(statement) == SQLITE_DONE)
             {
+                sqlite3_reset(statement);
                 sqlite3_close(self.database);
                 return YES;
             }
             else
             {
                 NSLog(@"Error %s while preparing statement", sqlite3_errmsg(self.database));
+                sqlite3_reset(statement);                
                 sqlite3_close(self.database);
                 return NO;
             }
-            sqlite3_reset(statement);
         }
         else
         {
