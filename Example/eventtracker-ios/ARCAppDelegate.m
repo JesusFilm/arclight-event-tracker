@@ -14,31 +14,21 @@
     // Override point for customization after application launch.
     
     // Override point for customization after application launch.
-    
-    
+#if TARGET_IPHONE_SIMULATOR
+    NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+#endif
+
     NSString *appVersionString = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
-    
-    
     
     // Initialzie tracker
     [EventTracker initializeWithApiKey:@"50105546a541a8.91252593"
-                             appDomain:@"Engagement ios TEST APP"
-                               appName:@"Engagement ios TEST APP"
+                             appDomain:@"test_jfm"
+                               appName:@"test_jfm ios"
                             appVersion:appVersionString];
-    
-    
-    // simulate play on launch
-    
-    // call new Arclight EventTracker service
-    [EventTracker trackPlayEventWithRefID:@"777"
-                             apiSessionID:@"111222333"
-                                streaming:YES
-                   mediaViewTimeInSeconds:10.0
-             mediaEngagementOver75Percent:YES];
-    
+        
     return YES;
 }
-							
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
