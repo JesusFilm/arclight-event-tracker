@@ -20,7 +20,7 @@
 // production
 
 #ifdef DEBUG
-    #define kApiEndpoint @"https://staging-analytics.arclight.org/"
+    #define kApiEndpoint @"https://staging-analytics.arclight.org/VideoPlayEvent/"
 #else
     #define kApiEndpoint @"https://analytics.arclight.org/VideoPlayEvent/"
 #endif
