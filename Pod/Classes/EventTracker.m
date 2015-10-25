@@ -1,6 +1,6 @@
 //
-//  Engagement.m
-//  Engagement
+//  EventTracker.m
+//  EventTracker
 //
 //  Copyright MBSJ LLC
 //
@@ -13,155 +13,36 @@
 #import <sqlite3.h>
 #import <CoreLocation/CoreLocation.h>
 #import "JFMReachability.h"
-#import <dispatch/dispatch.h>
 #import <sys/utsname.h>
 
 // Constants
 // production
 
 #ifdef DEBUG
-    #define kApiEndpoint @"https://staging-analytics.arclight.org/VideoPlayEvent/"
+static NSString * const kApiEndpoint = @"https://staging-analytics.arclight.org/VideoPlayEvent/";
 #else
-    #define kApiEndpoint @"https://analytics.arclight.org/VideoPlayEvent/"
+static NSString * const kApiEndpoint = @"https://analytics.arclight.org/VideoPlayEvent/";
 #endif
 
-#define kReachabilityHostName @"analytics.arclight.org"
-#define kType @"mobile"
-#define kDeviceFamily @"Apple"
-#define kMaxEventsPerRequest 100
-#define kSyncWithWebTime 10
+static NSString * const kReachabilityHostName = @"analytics.arclight.org";
+static NSString * const kType = @"mobile";
+static NSString * const kDeviceFamily = @"Apple";
 // User Defaults
-#define kUserDefaultLastKnownLatitude @"kUserDefaultLastKnownLatitude"
-#define kUserDefaultLastKnownLongitude @"kUserDefaultLastKnownLongitude"
-typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
+static NSString * const kUserDefaultLastKnownLatitude = @"kUserDefaultLastKnownLatitude";
+static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnownLongitude";
 
 #pragma mark - private class declarations
 /**
  * Defines our Event class to hold the event data.
  */
-@interface JFMEvent:NSObject
+@interface JFMEvent : NSObject
 @property(nonatomic) NSInteger event_id;
 @property(nonatomic) long timestamp;
 @property(nonatomic) BOOL hasLocationData;
 @property(nonatomic, strong) NSMutableDictionary *request;
-@property(nonatomic) BOOL synced;
 @end
 
 @implementation JFMEvent
-@end
-
-/**
- * Defines the interface for our operation
- */
-@interface EventOperation: NSOperation
-@property(nonatomic, strong) NSArray *events;
-@property(nonatomic, strong) EventOperationResponseBlock block;
-@end
-
-@implementation EventOperation
-
-- (void) main
-{
-    NSError *webError = nil;
-    BOOL recoverable = NO;
-    
-    for(JFMEvent *event in self.events)
-    {
-        NSError *jsonError;
-        
-        NSDictionary *eventData = [NSDictionary dictionaryWithDictionary:event.request];
-        NSArray *events = @[eventData];
-        NSDictionary *body = @{@"events": events};
-        
-        NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&jsonError];
-        
-        if (!jsonError)
-        {
-            NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
-            NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-            
-            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
-
-            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
-            
-            [request setHTTPMethod:@"POST"];
-            [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-            [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
-            [request setHTTPBody:jsonStringData];
-            
-            NSHTTPURLResponse *response = nil;
-            NSError *requestError = nil;
-            
-            // Check success from the server
-            NSData *data = [NSURLConnection sendSynchronousRequest:request
-                                                 returningResponse:&response
-                                                             error:&requestError];
-            NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
-            
-            if (httpResp.statusCode == 200)
-            {
-                NSError *jsonResponseError = nil;
-                NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonResponseError];
-                
-                if(jsonResponseError)
-                {
-                    webError = jsonResponseError;
-                }
-                else
-                {
-                    // Check the JSON response
-                    NSString *type = json[@"Result"][@"Type"];
-                    if(![type isEqualToString:@"Success"])
-                    {
-                        webError = [NSError errorWithDomain:@"com.arclight.response" code:(long)httpResp.statusCode userInfo:@{}];
-                    }
-                }
-            }
-            // TODO: Check valid failures
-            else
-            {
-                // Recoverable errors
-                if(httpResp.statusCode == 502 ||
-                   httpResp.statusCode == 503 ||
-                   httpResp.statusCode == 504 ||
-                   httpResp.statusCode == 507 ||
-                   httpResp.statusCode == 509 ||
-                   httpResp.statusCode == 511 ||
-                   httpResp.statusCode == 598 ||
-                   httpResp.statusCode == 599)
-                {
-                    recoverable = YES;
-                }
-                webError = [NSError errorWithDomain:@"com.arclight" code:(long)httpResp.statusCode userInfo:@{}];
-            }
-        }
-        else
-        {
-            webError = jsonError;
-            NSLog(@"Error parsing JSON while trying to post event: %@",[jsonError localizedDescription]);
-        }
-    }
-    
-    if(self.block)
-    {
-        if(webError && !recoverable) // Non recoverable error
-        {
-            self.block(self.events, webError);
-        }
-        else
-        {
-            if(webError) // Error but recoverable
-            {
-                self.block(nil, webError);
-            }
-            else // Success case
-            {
-                self.block(self.events, webError);
-            }
-        }
-    }
-}
-
 @end
 
 #pragma mark - Event Tracker
@@ -176,18 +57,14 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 @property(nonatomic) float latitude;
 @property(nonatomic) float longitude;
 @property(assign) BOOL syncing;
-@property(nonatomic, strong) NSOperationQueue *operationQueue;
 @property(assign) BOOL webServicesAvailable;
 @property(nonatomic, strong) JFMReachability *hostReachability;
 @end
 
 @implementation EventTracker
+
++ (id) sharedInstance
 {
-	dispatch_queue_t backGroundQueue;
-}
-
-
-+ (id)sharedInstance {
     static EventTracker *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -202,7 +79,6 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     {
         [self createDB];
         [self initLocationManager];
-        self.operationQueue = [NSOperationQueue new];
         
         /*
          Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
@@ -231,7 +107,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 {
     [[[EventTracker sharedInstance] locationManager] startUpdatingLocation];
     // Sync when the app becomes active
-    [[EventTracker sharedInstance] syncWithWeb:self];
+    [[EventTracker sharedInstance] syncEvents];
 }
 
 + (void) trackPlayEventWithRefID:(NSString *) refID
@@ -243,7 +119,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     
     if(![[EventTracker sharedInstance] apiKey])
     {
-        NSLog(@"Error: Event tracker API key not set.  Tracking events will not be logged");
+        NSLog(@"Error: Event tracker API key not set. Tracking events will not be logged.");
         return;
     }
     
@@ -285,16 +161,41 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
                                       @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false"
                                       };
     
-    JFMEvent *event = [[JFMEvent alloc] init];
+    JFMEvent *event = [JFMEvent new];
     event.hasLocationData = hasLocationData;
     event.event_id = 0;
     event.request = [eventDictionary mutableCopy];
     event.timestamp = timestamp;
-	
-	[[EventTracker sharedInstance] insertEvent:event];
+    
+    if([[EventTracker sharedInstance] insertEvent:event])
+    {
+        NSLog(@"successfully added event with dict: %@", eventDictionary);
+    }
     
     // Attempt a sync on event insert
-    [[EventTracker sharedInstance] syncWithWeb:self];
+    [[EventTracker sharedInstance] syncEvents];
+}
+
+#pragma mark - Reachability setup
+
+/*
+ * Called by Reachability whenever status changes.
+ */
+- (void) reachabilityChanged:(NSNotification *)note
+{
+    JFMReachability* curReach = [note object];
+    NSParameterAssert([curReach isKindOfClass:[JFMReachability class]]);
+    [self updateInterfaceWithReachability:curReach];
+}
+
+- (void) updateInterfaceWithReachability:(JFMReachability *)reachability
+{
+    if (reachability == self.hostReachability)
+    {
+        NetworkStatus netStatus = [reachability currentReachabilityStatus];
+        self.webServicesAvailable = (netStatus != NotReachable);
+        [self syncEvents];
+    }
 }
 
 #pragma mark - sqlite
@@ -315,62 +216,39 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
     return databasePath;
 }
 
+- (BOOL) databaseExists
+{
+    return [[NSFileManager defaultManager] fileExistsAtPath: [self databasePath]];
+}
+
 /**
- * Creates the sqlite database if it doesn't already exit. If the database exits, this method fails siliently.
+ * Creates the sqlite database if it doesn't already exist. If the database exists, this method fails silently.
  *
  * @return a boolean as to whether the db was created correctly
  */
-- (BOOL)createDB
+- (BOOL) createDB
 {
-    NSString *databasePath = [self databasePath];
-    BOOL isSuccess = YES;
-    NSFileManager *filemgr = [NSFileManager defaultManager];
-    // Check if the databse exits
-    if (![filemgr fileExistsAtPath: databasePath ])
+    if ([self databaseExists]) {
+        return YES;
+    }
+    
+    const char *dbpath = [[self databasePath] UTF8String];
+    if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
     {
-        const char *dbpath = [databasePath UTF8String];
-        if (sqlite3_open(dbpath, &_database) == SQLITE_OK)
-        {
-            char *errMsg;
-            const char *sql_stmt =
-            "create table if not exists events (id integer primary key autoincrement, timestamp long, has_location_data integer, request text)";
-            if (sqlite3_exec(self.database, sql_stmt, NULL, NULL, &errMsg)
-                != SQLITE_OK)
-            {
-                isSuccess = NO;
-                NSLog(@"Failed to create database table");
-            }
-            sqlite3_close(self.database);
-            return  isSuccess;
-        }
-        else {
-            isSuccess = NO;
-            NSLog(@"Failed to open/create database");
-        }
+        NSLog(@"Failed to open/create database");
+        return NO;
     }
-    return isSuccess;
-}
-
-#pragma mark - Reachability setup
-
-/*
- * Called by Reachability whenever status changes.
- */
-- (void) reachabilityChanged:(NSNotification *)note
-{
-	JFMReachability* curReach = [note object];
-	NSParameterAssert([curReach isKindOfClass:[JFMReachability class]]);
-	[self updateInterfaceWithReachability:curReach];
-}
-
-- (void)updateInterfaceWithReachability:(JFMReachability *)reachability
-{
-    if (reachability == self.hostReachability)
-	{
-        NetworkStatus netStatus = [reachability currentReachabilityStatus];
-        self.webServicesAvailable = (netStatus != NotReachable);
-        [self syncWithWeb:self];
+    
+    char *errMsg;
+    const char *sql_stmt =
+    "create table if not exists events (id integer primary key autoincrement, timestamp long, has_location_data integer, request text)";
+    BOOL success = sqlite3_exec(self.database, sql_stmt, NULL, NULL, &errMsg) != SQLITE_OK;
+    if (!success) {
+        NSLog(@"Failed to create database table");
     }
+    
+    sqlite3_close(self.database);
+    return success;
 }
 
 #pragma mark - Database
@@ -384,48 +262,34 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  */
 - (BOOL) queryDatabase:(NSString *) sql
 {
-    NSString *databasePath = [self databasePath];
-    BOOL isSuccess = YES;
-    NSFileManager *filemgr = [NSFileManager defaultManager];
-    // Check if the databse exits
-    if ([filemgr fileExistsAtPath: databasePath ])
-    {
-        const char *dbpath = [databasePath UTF8String];
-        if (sqlite3_open(dbpath, &_database) == SQLITE_OK)
-        {
-            const char *stmt = [sql UTF8String];
-            sqlite3_stmt *statement = nil;
-            sqlite3_prepare_v2(self.database, stmt,-1, &statement, NULL);
-            if (sqlite3_step(statement) == SQLITE_DONE)
-            {
-                sqlite3_reset(statement);
-                sqlite3_close(self.database);
-                return YES;
-            }
-            else
-            {
-                NSLog(@"Error %s while preparing statement", sqlite3_errmsg(self.database));
-                sqlite3_reset(statement);                
-                sqlite3_close(self.database);
-                return NO;
-            }
-        }
-        else
-        {
-            isSuccess = NO;
-        }
-    }
-    else
-    {
+    if (![self databaseExists]) {
         NSLog(@"Error inserting event. Database doesn't exit.");
-        isSuccess = NO;
+        return NO;
     }
     
-    return isSuccess;
+    const char *dbpath = [[self databasePath] UTF8String];
+    if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
+    {
+        NSLog(@"Error opening database");
+        return NO;
+    }
+    
+    const char *stmt = [sql UTF8String];
+    sqlite3_stmt *statement = nil;
+    sqlite3_prepare_v2(self.database, stmt, -1, &statement, NULL);
+    
+    BOOL success = sqlite3_step(statement) == SQLITE_DONE;
+    if (!success) {
+        NSLog(@"Error %s while preparing statement", sqlite3_errmsg(self.database));
+    }
+    sqlite3_reset(statement);
+    sqlite3_close(self.database);
+    
+    return success;
 }
 
 /**
- * Inserts a new event into the database 
+ * Inserts a new event into the database
  *
  * @params the event object to be inserted
  * @return boolean as to whether or not the request completed
@@ -445,7 +309,7 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 
 /**
  * Updates an event in the database. Used mainly when the location has been found.
- * 
+ *
  * @params event the event object ot be updated
  * @return boolean as to whether or not the request completed
  */
@@ -471,14 +335,12 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 }
 
 /**
- * Updates the location for all events that are missing a location. 
+ * Updates the location for all events that are missing a location.
  * @return a boolean value as to whether the record was updated
  */
-- (BOOL) updateLocationForEvents
+- (void) updateLocationForEvents
 {
-    NSArray *events = [self getAllEvents:YES];
-    
-    for (JFMEvent *event in events)
+    for (JFMEvent *event in [self eventsIncludingWithLocationData: NO])
     {
         NSMutableDictionary *request = event.request;
         request[@"latitude"] = [NSNumber numberWithFloat:self.latitude];
@@ -487,55 +349,55 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
         event.hasLocationData = YES;
         [self updateEvent:event];
     }
-    
-    return 1;
 }
 
 /**
  * Fetches all events from the database.
- * 
+ *
  * @params withoutLocationData a boolean determining if we only want events with no location data
  * @return an array of event objects
  **/
-- (NSArray *) getAllEvents:(BOOL) withoutLocationData
+- (NSArray *) eventsIncludingWithLocationData: (BOOL)withLocationData
 {
-    NSMutableArray *events = [@[] mutableCopy];
+    NSMutableArray *events = [NSMutableArray new];
     NSString *databasePath = [self databasePath];
     const char *dbpath = [databasePath UTF8String];
-    NSString *query;
-    if(withoutLocationData)
-    {
-        query = [NSString stringWithFormat:@"SELECT * from events where has_location_data = 0"];
+    NSString *query = @"SELECT * from events";
+    if (!withLocationData) {
+        query = [query stringByAppendingString: @" where has_location_data = 0"];
     }
-    else
-    {
-        query = [NSString stringWithFormat:@"SELECT * from events"];
-    }
+    
     sqlite3_stmt *statement;
-    if (sqlite3_open(dbpath, &_database) == SQLITE_OK)
+    if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
     {
-        if (sqlite3_prepare_v2(_database, [query UTF8String], -1, &statement, nil) == SQLITE_OK)
-        {
-           while (sqlite3_step(statement) == SQLITE_ROW)
-           {
-               int uniqueId = sqlite3_column_int(statement, 0);
-               long timestamp = (long)sqlite3_column_int(statement, 1);
-               int has_location_data = sqlite3_column_int(statement, 2);
-               char *request_char = (char *) sqlite3_column_text(statement, 3);
-               NSString *request = [[NSString alloc] initWithUTF8String:request_char];
-               
-               JFMEvent *event = [[JFMEvent alloc] init];
-               event.event_id = uniqueId;
-               event.timestamp = timestamp;
-               event.hasLocationData = has_location_data;
-               NSData *jsonData = [request dataUsingEncoding:NSUTF8StringEncoding];
-               event.request = [[NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:nil] mutableCopy];
-               [events addObject:event];
-           }
-           sqlite3_finalize(statement);
-        }
-        
+        NSLog(@"Error opening database");
+        return events;
     }
+    
+    if (sqlite3_prepare_v2(_database, [query UTF8String], -1, &statement, nil) != SQLITE_OK)
+    {
+        NSLog(@"Error preparing database");
+        return events;
+    }
+    
+    while (sqlite3_step(statement) == SQLITE_ROW)
+    {
+        int uniqueId = sqlite3_column_int(statement, 0);
+        long timestamp = (long)sqlite3_column_int(statement, 1);
+        int has_location_data = sqlite3_column_int(statement, 2);
+        char *request_char = (char *) sqlite3_column_text(statement, 3);
+        NSString *request = [[NSString alloc] initWithUTF8String:request_char];
+        
+        JFMEvent *event = [[JFMEvent alloc] init];
+        event.event_id = uniqueId;
+        event.timestamp = timestamp;
+        event.hasLocationData = has_location_data;
+        NSData *jsonData = [request dataUsingEncoding:NSUTF8StringEncoding];
+        event.request = [[NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:nil] mutableCopy];
+        [events addObject:event];
+    }
+    sqlite3_finalize(statement);
+    
     return events;
 }
 
@@ -560,7 +422,8 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
  * Delegate method for CLLocationManager fired when the user's location has been found. At this point,
  * we need to power down the GPS and store the location.
  */
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation {
+- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+{
     self.latitude = newLocation.coordinate.latitude;
     self.longitude = newLocation.coordinate.longitude;
     [self.locationManager stopUpdatingLocation];
@@ -592,111 +455,124 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
 
 #pragma mark - Web Interface
 
-- (void) syncWithWeb:(id) sender
+- (void) syncEvents
 {
-    __block EventTracker *weakSelf = self;
-    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^(void){
-        NSArray *events = [[EventTracker sharedInstance] getAllEvents:NO];
+    if (self.syncing) {
+        // a sync operation is already in progress
+        return;
+    }
+    
+    NSArray *events = [self eventsIncludingWithLocationData: YES];
+    if(![events count]) {
+        return;
+    }
+    
+    self.syncing = YES;
+    
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        __block NSError *webError;
+        __block BOOL recoverable = NO;
         
-        if ([events count] > 0)
+        for(JFMEvent *event in events)
         {
-            NSError *webError = nil;
-            BOOL recoverable = NO;
+            NSDictionary *eventData = [NSDictionary dictionaryWithDictionary:event.request];
+            NSArray *events = @[eventData];
+            NSDictionary *body = @{@"events": events};
             
-            for(JFMEvent *event in events)
+            NSError *jsonError;
+            NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&jsonError];
+            if (jsonError)
             {
-                NSError *jsonError;
-                
-                NSDictionary *eventData = [NSDictionary dictionaryWithDictionary:event.request];
-                NSArray *events = @[eventData];
-                NSDictionary *body = @{@"events": events};
-                
-                NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&jsonError];
-                
-                if (!jsonError)
-                {
-                    NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
-                    NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-                    
-                    NSLog(@"postData.body(JSON) == %@",jsonString);
-                    
-                    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
-                    
-                    NSLog(@"using url %@",url);
-                    
-                    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
-                    
-                    [request setHTTPMethod:@"POST"];
-                    [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-                    [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
-                    [request setHTTPBody:jsonStringData];
-                    
-                    NSHTTPURLResponse *response = nil;
-                    NSError *requestError = nil;
-                    
-                    // Check success from the server
-                    NSData *data = [NSURLConnection sendSynchronousRequest:request
-                                                         returningResponse:&response
-                                                                     error:&requestError];
-                    NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
-                    
-                    NSString *strResponse = [[NSString alloc] initWithData:data
-                                                                  encoding:NSUTF8StringEncoding];
-
-                    NSLog(@"response code == %d",(int)httpResp.statusCode);
-                    NSLog(@"strResponse == %@", strResponse);
-                    
-                    if (httpResp.statusCode == 200)
-                    {
-                        NSError *jsonResponseError = nil;
-                        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonResponseError];
-                        
-                        if(jsonResponseError)
-                        {
-                            webError = jsonResponseError;
-                        }
-                        else
-                        {
-                            // Check the JSON response
-                            NSString *type = json[@"Result"][@"Type"];
-                            if(![type isEqualToString:@"Success"])
-                            {
-                                webError = [NSError errorWithDomain:@"com.arclight.response" code:(long)httpResp.statusCode userInfo:@{}];
-                            }
-                        }
-                        NSLog(@"response %@", json);
-                        
-                    }
-                    // TODO: Check valid failures
-                    else
-                    {
-                        // Recoverable errors
-                        if(httpResp.statusCode == 502 ||
-                           httpResp.statusCode == 503 ||
-                           httpResp.statusCode == 504 ||
-                           httpResp.statusCode == 507 ||
-                           httpResp.statusCode == 509 ||
-                           httpResp.statusCode == 511 ||
-                           httpResp.statusCode == 598 ||
-                           httpResp.statusCode == 599)
-                        {
-                            recoverable = YES;
-                        }
-                        webError = [NSError errorWithDomain:@"com.arclight" code:(long)httpResp.statusCode userInfo:@{}];
-                    }
-                }
-                else
-                {
-                    webError = jsonError;
-                    NSLog(@"Error parsing JSON while trying to post event: %@",[jsonError localizedDescription]);
-                }
+                webError = jsonError;
+                NSLog(@"Error parsing JSON while trying to post event: %@",[jsonError localizedDescription]);
+                continue;
             }
             
-            if(!webError)
+            NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
+            NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+            
+            NSLog(@"postData.body(JSON) == %@",jsonString);
+            
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
+            
+            NSLog(@"using url %@",url);
+            
+            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
+            
+            [request setHTTPMethod:@"POST"];
+            [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+            [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
+            [request setHTTPBody:jsonStringData];
+            
+            // Check success from the server
+            dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);  // semaphore makes the asynchronous NSURLSession method synchronous
+            
+            [[[NSURLSession sharedSession] dataTaskWithRequest:request
+                                             completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+                                                 NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
+                                                 
+                                                 NSLog(@"response code: %d", (int)httpResp.statusCode);
+                                                 NSLog(@"raw response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                                                 
+                                                 if (httpResp.statusCode == 200)
+                                                 {
+                                                     NSError *jsonResponseError = nil;
+                                                     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonResponseError];
+                                                     NSLog(@"response dict: %@", json);
+                                                     if(jsonResponseError)
+                                                     {
+                                                         webError = jsonResponseError;
+                                                     }
+                                                     else
+                                                     {
+                                                         // Check the JSON response
+                                                         NSString *type = [json valueForKeyPath: @"Result.Type"];
+                                                         if(![type isEqualToString:@"Success"])
+                                                         {
+                                                             webError = [NSError errorWithDomain:@"com.arclight.response" code:(long)httpResp.statusCode userInfo:@{}];
+                                                         }
+                                                     }
+                                                     
+                                                 }
+                                                 // TODO: Check valid failures
+                                                 else
+                                                 {
+                                                     // Recoverable errors
+                                                     if(httpResp.statusCode == 502 ||
+                                                        httpResp.statusCode == 503 ||
+                                                        httpResp.statusCode == 504 ||
+                                                        httpResp.statusCode == 507 ||
+                                                        httpResp.statusCode == 509 ||
+                                                        httpResp.statusCode == 511 ||
+                                                        httpResp.statusCode == 598 ||
+                                                        httpResp.statusCode == 599)
+                                                     {
+                                                         recoverable = YES;
+                                                     }
+                                                     
+                                                     webError = [NSError errorWithDomain:@"com.arclight" code:(long)httpResp.statusCode userInfo:@{}];
+                                                 }
+                                                 
+                                                 dispatch_semaphore_signal(semaphore);
+                                             }] resume];
+            
+            dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+        }
+        
+        if(!webError)
+        {
+            NSLog(@"deleting synced events %@", events);
+            // Delete this group of events
+            for (JFMEvent *event in events)
             {
-                
-                NSLog(@"deleting these events %@", events);
-                // Delete this group of events
+                [weakSelf removeEvent:event];
+            }
+        }
+        else
+        {
+            if(events.count && !recoverable) // Unrecoverable error
+            {
                 for (JFMEvent *event in events)
                 {
                     [weakSelf removeEvent:event];
@@ -704,20 +580,12 @@ typedef void (^EventOperationResponseBlock) (NSArray *events, NSError *error);
             }
             else
             {
-                if(events && events.count && !recoverable) // Unrecoverable error
-                {
-                    for (JFMEvent *event in events)
-                    {
-                        [weakSelf removeEvent:event];
-                    }
-                }
-                else
-                {
-                    // Do nothing and ignore
-                    NSLog(@"A recoverable error occured %@", webError);
-                }
+                // Do nothing and ignore
+                NSLog(@"A recoverable error occurred %@", webError);
             }
         }
+        
+        self.syncing = NO;
     });
 }
 
