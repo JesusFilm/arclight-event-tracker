@@ -59,6 +59,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 @property(assign) BOOL syncing;
 @property(assign) BOOL webServicesAvailable;
 @property(nonatomic, strong) JFMReachability *hostReachability;
+@property(nonatomic, assign) UIBackgroundTaskIdentifier syncTaskID;
 @end
 
 @implementation EventTracker
@@ -79,6 +80,8 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     {
         [self createDB];
         [self initLocationManager];
+        
+        self.syncTaskID = UIBackgroundTaskInvalid;
         
         /*
          Observe the kNetworkReachabilityChangedNotification. When that notification is posted, the method reachabilityChanged will be called.
@@ -469,6 +472,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     self.syncing = YES;
     
+    self.syncTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler: ^{
+        [[UIApplication sharedApplication] endBackgroundTask:self.syncTaskID];
+        self.syncTaskID = UIBackgroundTaskInvalid;
+    }];
+    
     __weak __typeof__(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
         __block NSError *webError;
@@ -586,6 +594,9 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         }
         
         self.syncing = NO;
+        
+        [[UIApplication sharedApplication] endBackgroundTask:self.syncTaskID];
+        self.syncTaskID = UIBackgroundTaskInvalid;
     });
 }
 
