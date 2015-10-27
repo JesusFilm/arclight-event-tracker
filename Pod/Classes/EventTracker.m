@@ -58,13 +58,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 @property(nonatomic) float longitude;
 @property(assign) BOOL syncing;
 @property(assign) BOOL webServicesAvailable;
+@property(assign) BOOL loggingEnabled;
 @property(nonatomic, strong) JFMReachability *hostReachability;
 @property(nonatomic, assign) UIBackgroundTaskIdentifier syncTaskID;
 @end
 
 @implementation EventTracker
 
-+ (id) sharedInstance
++ (instancetype) sharedInstance
 {
     static EventTracker *sharedInstance = nil;
     static dispatch_once_t onceToken;
@@ -113,6 +114,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     [[EventTracker sharedInstance] syncEvents];
 }
 
++ (void) setLoggingEnabled: (BOOL)loggingEnabled
+{
+    [EventTracker sharedInstance].loggingEnabled = loggingEnabled;
+}
+
 + (void) trackPlayEventWithRefID:(NSString *) refID
                     apiSessionID:(NSString *) apiSessionID
                        streaming:(BOOL) streaming
@@ -122,7 +128,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     if(![[EventTracker sharedInstance] apiKey])
     {
-        NSLog(@"Error: Event tracker API key not set. Tracking events will not be logged.");
+        [[EventTracker sharedInstance] logMessage: @"Error: Event tracker API key not set. Tracking events will not be logged."];
         return;
     }
     
@@ -172,7 +178,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     if([[EventTracker sharedInstance] insertEvent:event])
     {
-        NSLog(@"successfully added event with dict: %@", eventDictionary);
+        [[EventTracker sharedInstance] logMessage: [NSString stringWithFormat: @"successfully added event with dict: %@", eventDictionary]];
     }
     
     // Attempt a sync on event insert
@@ -199,6 +205,17 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         self.webServicesAvailable = (netStatus != NotReachable);
         [self syncEvents];
     }
+}
+
+#pragma mark - Helpers
+
+- (void) logMessage:(NSString *)message
+{
+    if (!self.loggingEnabled) {
+        return;
+    }
+    
+    NSLog(@"%@: %@", NSStringFromClass([self class]), message);
 }
 
 #pragma mark - sqlite
@@ -238,7 +255,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     const char *dbpath = [[self databasePath] UTF8String];
     if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
     {
-        NSLog(@"Failed to open/create database");
+        [self logMessage: @"Failed to open/create database"];
         return NO;
     }
     
@@ -247,7 +264,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     "create table if not exists events (id integer primary key autoincrement, timestamp long, has_location_data integer, request text)";
     BOOL success = sqlite3_exec(self.database, sql_stmt, NULL, NULL, &errMsg) != SQLITE_OK;
     if (!success) {
-        NSLog(@"Failed to create database table");
+        [self logMessage: @"Failed to create database table"];
     }
     
     sqlite3_close(self.database);
@@ -266,14 +283,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 - (BOOL) queryDatabase:(NSString *) sql
 {
     if (![self databaseExists]) {
-        NSLog(@"Error inserting event. Database doesn't exit.");
+        [self logMessage: @"Error inserting event. Database doesn't exit."];
         return NO;
     }
     
     const char *dbpath = [[self databasePath] UTF8String];
     if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
     {
-        NSLog(@"Error opening database");
+        [self logMessage: @"Error opening database"];
         return NO;
     }
     
@@ -283,7 +300,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     BOOL success = sqlite3_step(statement) == SQLITE_DONE;
     if (!success) {
-        NSLog(@"Error %s while preparing statement", sqlite3_errmsg(self.database));
+        [self logMessage: [NSString stringWithFormat: @"Error %s while preparing statement", sqlite3_errmsg(self.database)]];
     }
     sqlite3_reset(statement);
     sqlite3_close(self.database);
@@ -373,13 +390,13 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     sqlite3_stmt *statement;
     if (sqlite3_open(dbpath, &_database) != SQLITE_OK)
     {
-        NSLog(@"Error opening database");
+        [self logMessage: @"Error opening database"];
         return events;
     }
     
     if (sqlite3_prepare_v2(_database, [query UTF8String], -1, &statement, nil) != SQLITE_OK)
     {
-        NSLog(@"Error preparing database");
+        [self logMessage: @"Error preparing database"];
         return events;
     }
     
@@ -493,18 +510,18 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
             if (jsonError)
             {
                 webError = jsonError;
-                NSLog(@"Error parsing JSON while trying to post event: %@",[jsonError localizedDescription]);
+                [self logMessage: [NSString stringWithFormat: @"Error parsing JSON while trying to post event: %@", [jsonError localizedDescription]]];
                 continue;
             }
             
             NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
             NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
             
-            NSLog(@"postData.body(JSON) == %@",jsonString);
+            [self logMessage: [NSString stringWithFormat: @"postData.body(JSON) == %@", jsonString]];
             
             NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
             
-            NSLog(@"using url %@",url);
+            [self logMessage: [NSString stringWithFormat: @"using url %@", url]];
             
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
             
@@ -520,14 +537,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                              completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                                                  NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
                                                  
-                                                 NSLog(@"response code: %d", (int)httpResp.statusCode);
-                                                 NSLog(@"raw response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                                                 [self logMessage: [NSString stringWithFormat: @"response code: %d", (int)httpResp.statusCode]];
+                                                 [self logMessage: [NSString stringWithFormat: @"raw response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
                                                  
                                                  if (httpResp.statusCode == 200)
                                                  {
                                                      NSError *jsonResponseError = nil;
                                                      NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonResponseError];
-                                                     NSLog(@"response dict: %@", json);
+                                                     [self logMessage: [NSString stringWithFormat: @"response dict: %@", json]];
                                                      if(jsonResponseError)
                                                      {
                                                          webError = jsonResponseError;
@@ -570,7 +587,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         
         if(!webError)
         {
-            NSLog(@"deleting synced events %@", events);
+            [self logMessage: [NSString stringWithFormat: @"deleting synced events %@", events]];
             // Delete this group of events
             for (JFMEvent *event in events)
             {
@@ -589,7 +606,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
             else
             {
                 // Do nothing and ignore
-                NSLog(@"A recoverable error occurred %@", webError);
+                [self logMessage: [NSString stringWithFormat: @"A recoverable error occurred %@", webError]];
             }
         }
         
