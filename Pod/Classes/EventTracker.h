@@ -42,7 +42,7 @@
  *  @param refID                        the id of the video being played
  *  @param apiSessionID                 this should be retrieved from the server and is used to track a single playback session
  *  @param streaming                    a boolean value that is true when the video is being streamed from the web vs played from cache
- *  @param seconds                      the number of secons that the video was viewed
+ *  @param seconds                      the number of seconds that the video was viewed
  *  @param mediaEngagementOver75Percent set to true only if the video was played over 75%
  */
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent;
@@ -53,7 +53,14 @@
  *
  * @return the one and only instance of the event tracker.
  */
-+ (id)sharedInstance;
++ (instancetype)sharedInstance;
+
+/**
+ *  Allows you to control whether EventTracker logs messages to the console
+ *
+ *  @param loggingEnabled   a boolean value which determine whether or not EventTracker logs messages to the console
+ */
++ (void) setLoggingEnabled: (BOOL)loggingEnabled;   // default = NO
 
 /**
  *  Allows you to update the API key for the tracker
