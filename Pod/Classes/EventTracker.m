@@ -25,12 +25,12 @@ NSString * const kShareMethodFacebook = @"Facebook";
 NSString * const kShareMethodBlueTooth3GP = @"Bluetooth 3GP";
 NSString * const kShareMethodEmbedURL = @"Embed URL Copy";
 
-#warning TURN BACK ON
-//#ifdef DEBUG
+
+#ifdef DEBUG
 static NSString * const kApiBaseUrl = @"http://staging-analytics.arclight.org";
-//#else
-//static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
-//#endif
+#else
+static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
+#endif
 
 static NSString * const kApiPlayEndpoint = @"/VideoPlayEvent/";
 static NSString * const kApiShareEndpoint = @"/ShareEvent/";
