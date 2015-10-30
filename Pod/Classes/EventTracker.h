@@ -8,6 +8,13 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+// share method constants
+extern NSString * const kShareMethodTwitter;
+extern NSString * const kShareMethodEmail;
+extern NSString * const kShareMethodFacebook;
+extern NSString * const kShareMethodBlueTooth3GP;
+extern NSString * const kShareMethodEmbedURL;
+
 /**
  *  <p>The Event Tracker is used to track plays of a given video.</p>
  *
@@ -46,6 +53,10 @@
  *  @param mediaEngagementOver75Percent set to true only if the video was played over 75%
  */
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent;
+
+
++ (void) trackShareEventFromShareMethod:(NSString *) shareMethod refID:(NSString *) refID apiSessionID:(NSString *) apiSessionID;
+
 
 /**
  * Singleton reference so that there only ever exists one event tracker. Make sure to
