@@ -18,11 +18,23 @@
 // Constants
 // production
 
-#ifdef DEBUG
-static NSString * const kApiEndpoint = @"https://staging-analytics.arclight.org/VideoPlayEvent/";
-#else
-static NSString * const kApiEndpoint = @"https://analytics.arclight.org/VideoPlayEvent/";
-#endif
+
+NSString * const kShareMethodTwitter = @"Twitter";
+NSString * const kShareMethodEmail = @"Email";
+NSString * const kShareMethodFacebook = @"Facebook";
+NSString * const kShareMethodBlueTooth3GP = @"Bluetooth 3GP";
+NSString * const kShareMethodEmbedURL = @"Embed URL Copy";
+
+#warning TURN BACK ON
+//#ifdef DEBUG
+static NSString * const kApiBaseUrl = @"http://staging-analytics.arclight.org";
+//#else
+//static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
+//#endif
+
+static NSString * const kApiPlayEndpoint = @"/VideoPlayEvent/";
+static NSString * const kApiShareEndpoint = @"/ShareEvent/";
+
 
 static NSString * const kReachabilityHostName = @"analytics.arclight.org";
 static NSString * const kType = @"mobile";
@@ -183,6 +195,52 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     // Attempt a sync on event insert
     [[EventTracker sharedInstance] syncEvents];
+}
+
++ (void) trackShareEventFromShareMethod:(NSString *) shareMethod
+                                  refID:(NSString *) refID
+                           apiSessionID:(NSString *) apiSessionID
+{
+    if(![[EventTracker sharedInstance] apiKey])
+    {
+        [[EventTracker sharedInstance] logMessage: @"Error: Event tracker API key not set. Tracking events will not be logged."];
+        return;
+    }
+    
+    NSTimeInterval timestamp = [[NSDate date] timeIntervalSince1970];
+    
+    // per arclight - they want deviceId & each eventID
+    NSString *eventUUID = [[NSUUID UUID] UUIDString];
+    
+    NSString *type = kType;
+    float latitude = [[EventTracker sharedInstance] latitude];
+    float longitude = [[EventTracker sharedInstance] longitude];
+    
+    NSString *deviceFamily = kDeviceFamily;
+    NSString *deviceName = machineName();
+    
+    NSString *deviceOS = [NSString stringWithFormat:@"%@ %@",@"iOS",
+                          [[UIDevice currentDevice] systemVersion]];
+    NSString *appName = [[EventTracker sharedInstance] appName];
+    NSString *appVersion = [[EventTracker sharedInstance] appVersion];
+    
+    NSDictionary *eventDictionary = @{
+                                      @"timestamp" : [NSNumber numberWithLongLong:timestamp],
+                                      @"uuid" : eventUUID,
+                                      @"type" : type,
+                                      @"latitude" : [NSNumber numberWithFloat:latitude],
+                                      @"longitude" : [NSNumber numberWithFloat:longitude],
+                                      @"refId" : refID ? refID : @"N/A",
+                                      @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
+                                      @"deviceFamily" : deviceFamily,
+                                      @"deviceName" : deviceName,
+                                      @"deviceOs" : deviceOS,
+                                      @"appName" : appName,
+                                      @"appVersion" : appVersion,
+                                      @"shareMethod" : shareMethod
+                                      };
+    
+    [[EventTracker sharedInstance] postSharedEvent:eventDictionary];
 }
 
 #pragma mark - Reachability setup
@@ -519,7 +577,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
             
             [self logMessage: [NSString stringWithFormat: @"postData.body(JSON) == %@", jsonString]];
             
-            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@?apiKey=%@",kApiEndpoint,[[EventTracker sharedInstance] apiKey]]];
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@",kApiBaseUrl,kApiPlayEndpoint,[[EventTracker sharedInstance] apiKey]]];
             
             [self logMessage: [NSString stringWithFormat: @"using url %@", url]];
             
@@ -615,6 +673,69 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         [[UIApplication sharedApplication] endBackgroundTask:self.syncTaskID];
         self.syncTaskID = UIBackgroundTaskInvalid;
     });
+}
+
+- (void) postSharedEvent:(NSDictionary*)sharedEventData
+{
+    __block NSError *webError;
+
+    NSDictionary *eventData = [NSDictionary dictionaryWithDictionary:sharedEventData];
+    NSArray *events = @[eventData];
+    NSDictionary *body = @{@"events": events};
+    
+    NSError *jsonError;
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&jsonError];
+    if (jsonError)
+    {
+        webError = jsonError;
+        [self logMessage: [NSString stringWithFormat: @"Error parsing JSON while trying to post event: %@", [jsonError localizedDescription]]];
+    }
+    
+    NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
+    NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    [self logMessage: [NSString stringWithFormat: @"postData.body(JSON) == %@", jsonString]];
+    
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@",kApiBaseUrl,kApiShareEndpoint,[[EventTracker sharedInstance] apiKey]]];
+
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
+    
+    [request setHTTPMethod:@"POST"];
+    [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    [request setHTTPBody:jsonStringData];
+    
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request
+         completionHandler:^(NSData * _Nullable data,
+                             NSURLResponse * _Nullable response,
+                             NSError * _Nullable error)
+    {
+         NSHTTPURLResponse *httpResp = (NSHTTPURLResponse*) response;
+         
+         [self logMessage: [NSString stringWithFormat: @"response code: %d", (int)httpResp.statusCode]];
+         [self logMessage: [NSString stringWithFormat: @"raw response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]]];
+         
+         if (httpResp.statusCode == 200)
+         {
+             NSError *jsonResponseError = nil;
+             NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonResponseError];
+             [self logMessage: [NSString stringWithFormat: @"response dict: %@", json]];
+             if(jsonResponseError)
+             {
+                 webError = jsonResponseError;
+             }
+             else
+             {
+                 // Check the JSON response
+                 NSString *type = [json valueForKeyPath: @"Result.Type"];
+                 if(![type isEqualToString:@"Success"])
+                 {
+                     webError = [NSError errorWithDomain:@"com.arclight.response" code:(long)httpResp.statusCode userInfo:@{}];
+                 }
+             }
+         } else {
+             [self logMessage:@"non 200 from sharing event"];
+         }
+    }] resume];
 }
 
 NSString* machineName()
