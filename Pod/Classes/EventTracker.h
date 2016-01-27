@@ -54,6 +54,18 @@ extern NSString * const kShareMethodEmbedURL;
  */
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent;
 
+/**
+ *  This method is used to track a play event. It's meant to be called when a user plays a video.
+ *
+ *  @param refID                        the id of the video being played
+ *  @param apiSessionID                 this should be retrieved from the server and is used to track a single playback session
+ *  @param streaming                    a boolean value that is true when the video is being streamed from the web vs played from cache
+ *  @param seconds                      the number of seconds that the video was viewed
+ *  @param mediaEngagementOver75Percent set to true only if the video was played over 75%
+ *  @param appScreen                    the screen that the video is being streamed from
+ */
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent appScreen:(NSString *)appScreen;
+
 
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod refID:(NSString *) refID apiSessionID:(NSString *) apiSessionID;
 

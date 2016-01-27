@@ -136,6 +136,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                        streaming:(BOOL) streaming
           mediaViewTimeInSeconds:(float) seconds
     mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
+                       appScreen:(NSString *)appScreen
 {
     
     if(![[EventTracker sharedInstance] apiKey])
@@ -165,7 +166,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     NSString *deviceType =  UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"tablet" : @"handheld";
     
-    NSDictionary *eventDictionary = @{
+    NSMutableDictionary *eventDictionary = [NSMutableDictionary dictionaryWithDictionary:@{
                                       @"timestamp" : [NSNumber numberWithLongLong:timestamp],
                                       @"uuid" : eventUUID,
                                       @"type" : type,
@@ -183,7 +184,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                       @"mediaViewTimeInSeconds" : [NSString stringWithFormat:@"%f",seconds],
                                       @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false",
                                       @"deviceType" : deviceType
-                                      };
+                                      }];
+    if (appScreen)
+    {
+        [eventDictionary setObject:appScreen forKey:@"appScreen"];
+    }
     
     JFMEvent *event = [JFMEvent new];
     event.hasLocationData = hasLocationData;
@@ -198,6 +203,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     // Attempt a sync on event insert
     [[EventTracker sharedInstance] syncEvents];
+}
+
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
+{
+    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent appScreen:nil];
 }
 
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod
