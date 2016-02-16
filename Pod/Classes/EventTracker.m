@@ -136,7 +136,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                        streaming:(BOOL) streaming
           mediaViewTimeInSeconds:(float) seconds
     mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
-                       appScreen:(NSString *)appScreen
+                     extraParams:(NSDictionary *)extraParams
 {
     
     if(![[EventTracker sharedInstance] apiKey])
@@ -185,10 +185,20 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                       @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false",
                                       @"deviceType" : deviceType
                                       }];
-    if (appScreen)
+    
+    if (extraParams)
     {
-        [eventDictionary setObject:appScreen forKey:@"appScreen"];
+        if (extraParams[@"appScreen"])
+        {
+            [eventDictionary setObject:extraParams[@"appScreen"] forKey:@"appScreen"];
+        }
+        
+        if (extraParams[@"subtitleLanguageId"])
+        {
+            [eventDictionary setObject:extraParams[@"subtitleLanguageId"] forKey:@"subtitleLanguageId"];
+        }
     }
+    
     
     JFMEvent *event = [JFMEvent new];
     event.hasLocationData = hasLocationData;
@@ -207,7 +217,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
 {
-    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent appScreen:nil];
+    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent extraParams:nil];
 }
 
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod
