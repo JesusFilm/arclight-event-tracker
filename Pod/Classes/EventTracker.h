@@ -62,9 +62,11 @@ extern NSString * const kShareMethodEmbedURL;
  *  @param streaming                    a boolean value that is true when the video is being streamed from the web vs played from cache
  *  @param seconds                      the number of seconds that the video was viewed
  *  @param mediaEngagementOver75Percent set to true only if the video was played over 75%
- *  @param appScreen                    the screen that the video is being streamed from
+ *  @param extraParams                  nsdictionary to hold:
+                                          key: @"appScreen" value: a string that displays the screen the video was streamed from
+                                          key: @"subtitleLanguageId" value: a string of the last subtitle's language Id used
  */
-+ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent appScreen:(NSString *)appScreen;
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent extraParams:(NSDictionary *)extraParams;
 
 
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod refID:(NSString *) refID apiSessionID:(NSString *) apiSessionID;
