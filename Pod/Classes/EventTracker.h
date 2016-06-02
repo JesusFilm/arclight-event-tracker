@@ -62,15 +62,37 @@ extern NSString * const kShareMethodEmbedURL;
  *  @param streaming                    a boolean value that is true when the video is being streamed from the web vs played from cache
  *  @param seconds                      the number of seconds that the video was viewed
  *  @param mediaEngagementOver75Percent set to true only if the video was played over 75%
- *  @param extraParams                  nsdictionary to hold:
+ *  @param extraParams                  nsdictionary to hold any of these key/value pairs:
                                           key: @"appScreen" value: a string that displays the screen the video was streamed from
                                           key: @"subtitleLanguageId" value: a string of the last subtitle's language Id used
+                                          key: @"mediaComponentId" value: a string of the media's component id
+                                          key: @"languageId" value: string of the media's language id
  */
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent extraParams:(NSDictionary *)extraParams;
 
-
+/**
+ * This method is used to track a share event. It;s meant to be called when a user shares a video.
+ *
+ * @param shareMethod                 the method that the video was shared. (Email, Facebook, Twitter, Bluetooth 3GP, Embed URL Copy)
+ * @param refId                       the id of the video being played
+ * @param apiSessionID                this should be retrieved from the server and is used to track a single playback session
+ */
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod refID:(NSString *) refID apiSessionID:(NSString *) apiSessionID;
 
+/**
+ * This method is used to track a share event. It;s meant to be called when a user shares a video.
+ *
+ * @param shareMethod                 the method that the video was shared. (Email, Facebook, Twitter, Bluetooth 3GP, Embed URL Copy)
+ * @param refId                       the id of the video being played
+ * @param apiSessionID                this should be retrieved from the server and is used to track a single playback session
+ * @param extraParams                 nsdictionary to hold any of these key/value pairs:
+                                      key: @"mediaComponentId" value: a string of the media's component id
+                                      key: @"languageId" value: string of the media's language id
+ */
++ (void) trackShareEventFromShareMethod:(NSString *) shareMethod
+                                  refID:(NSString *) refID
+                           apiSessionID:(NSString *) apiSessionID
+                            extraParams:(NSDictionary *)extraParams;
 
 /**
  * Singleton reference so that there only ever exists one event tracker. Make sure to

@@ -172,7 +172,6 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                       @"type" : type,
                                       @"latitude" : [NSNumber numberWithFloat:latitude],
                                       @"longitude" : [NSNumber numberWithFloat:longitude],
-                                      @"refId" : refID ? refID : @"N/A",
                                       @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
                                       @"deviceFamily" : deviceFamily,
                                       @"deviceName" : deviceName,
@@ -185,7 +184,9 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                       @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false",
                                       @"deviceType" : deviceType
                                       }];
-    
+  
+    NSString *mediaComponentId;
+    NSString *languageId;
     if (extraParams)
     {
         if (extraParams[@"appScreen"])
@@ -197,9 +198,29 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         {
             [eventDictionary setObject:extraParams[@"subtitleLanguageId"] forKey:@"subtitleLanguageId"];
         }
+      
+        if (extraParams[@"mediaComponentId"] && extraParams[@"languageId"])
+        {
+          mediaComponentId = extraParams[@"mediaComponentId"];
+          languageId = extraParams[@"languageId"];
+        }
     }
-    
-    
+  
+    if (refID)
+    {
+        [eventDictionary setObject:refID forKey:@"refId"];
+    }
+    else if (mediaComponentId && languageId)
+    {
+        [eventDictionary setObject:mediaComponentId forKey:@"mediaComponentId"];
+        [eventDictionary setObject:languageId forKey:@"languageId"];
+    }
+    else
+    {
+        [[EventTracker sharedInstance] logMessage: @"Error: Event tracker refId or mediaComponentId and languageId not set. Tracking events will not be logged."];
+        return;
+    }
+  
     JFMEvent *event = [JFMEvent new];
     event.hasLocationData = hasLocationData;
     event.event_id = 0;
@@ -223,6 +244,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod
                                   refID:(NSString *) refID
                            apiSessionID:(NSString *) apiSessionID
+{
+    [self trackShareEventFromShareMethod:shareMethod refID:refID apiSessionID:apiSessionID extraParams:nil];
+}
+
++ (void) trackShareEventFromShareMethod:(NSString *) shareMethod
+                                  refID:(NSString *) refID
+                           apiSessionID:(NSString *) apiSessionID
+                            extraParams:(NSDictionary *)extraParams
 {
     if(![[EventTracker sharedInstance] apiKey])
     {
@@ -248,13 +277,12 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     NSString *deviceType =  UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"tablet" : @"handheld";
     
-    NSDictionary *eventDictionary = @{
+    NSMutableDictionary *eventDictionary = [NSMutableDictionary dictionaryWithDictionary:@{
                                       @"timestamp" : [NSNumber numberWithLongLong:timestamp],
                                       @"uuid" : eventUUID,
                                       @"type" : type,
                                       @"latitude" : [NSNumber numberWithFloat:latitude],
                                       @"longitude" : [NSNumber numberWithFloat:longitude],
-                                      @"refId" : refID ? refID : @"N/A",
                                       @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
                                       @"deviceFamily" : deviceFamily,
                                       @"deviceName" : deviceName,
@@ -263,9 +291,34 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                       @"appVersion" : appVersion,
                                       @"shareMethod" : shareMethod,
                                       @"deviceType" : deviceType
-                                      };
-    
-    [[EventTracker sharedInstance] postSharedEvent:eventDictionary];
+                                      }];
+  NSString *mediaComponentId;
+  NSString *languageId;
+  if (extraParams)
+  {
+      if (extraParams[@"mediaComponentId"] && extraParams[@"languageId"])
+      {
+        mediaComponentId = extraParams[@"mediaComponentId"];
+        languageId = extraParams[@"languageId"];
+      }
+  }
+  
+  if (refID)
+  {
+      [eventDictionary setObject:refID forKey:@"refId"];
+  }
+  else if (mediaComponentId && languageId)
+  {
+      [eventDictionary setObject:mediaComponentId forKey:@"mediaComponentId"];
+      [eventDictionary setObject:languageId forKey:@"languageId"];
+  }
+  else
+  {
+      [[EventTracker sharedInstance] logMessage: @"Error: Event tracker refId or mediaComponentId and languageId not set. Tracking events will not be logged."];
+      return;
+  }
+  
+  [[EventTracker sharedInstance] postSharedEvent:eventDictionary];
 }
 
 #pragma mark - Reachability setup
