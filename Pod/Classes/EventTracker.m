@@ -27,7 +27,7 @@ NSString * const kShareMethodEmbedURL = @"Embed URL Copy";
 
 
 #ifdef DEBUG
-static NSString * const kApiBaseUrl = @"http://staging-analytics.arclight.org";
+static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
 #else
 static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
 #endif
@@ -131,6 +131,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     [EventTracker sharedInstance].loggingEnabled = loggingEnabled;
 }
 
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
+{
+    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent extraParams:nil];
+}
+
 + (void) trackPlayEventWithRefID:(NSString *) refID
                     apiSessionID:(NSString *) apiSessionID
                        streaming:(BOOL) streaming
@@ -138,6 +143,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
                      extraParams:(NSDictionary *)extraParams
 {
+    
+    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent extraParams:extraParams customParams:nil];
+}
+
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent extraParams:(NSDictionary *)extraParams customParams:(NSDictionary *)customParams {
     
     if(![[EventTracker sharedInstance] apiKey])
     {
@@ -167,24 +177,24 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     NSString *deviceType =  UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"tablet" : @"handheld";
     
     NSMutableDictionary *eventDictionary = [NSMutableDictionary dictionaryWithDictionary:@{
-                                      @"timestamp" : [NSNumber numberWithLongLong:timestamp],
-                                      @"uuid" : eventUUID,
-                                      @"type" : type,
-                                      @"latitude" : [NSNumber numberWithFloat:latitude],
-                                      @"longitude" : [NSNumber numberWithFloat:longitude],
-                                      @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
-                                      @"deviceFamily" : deviceFamily,
-                                      @"deviceName" : deviceName,
-                                      @"deviceOs" : deviceOS,
-                                      @"domain" : domain,
-                                      @"appName" : appName,
-                                      @"appVersion" : appVersion,
-                                      @"isStreaming" : streaming ? @"true" : @"false",
-                                      @"mediaViewTimeInSeconds" : [NSString stringWithFormat:@"%f",seconds],
-                                      @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false",
-                                      @"deviceType" : deviceType
-                                      }];
-  
+                                                                                           @"timestamp" : [NSNumber numberWithLongLong:timestamp],
+                                                                                           @"uuid" : eventUUID,
+                                                                                           @"type" : type,
+                                                                                           @"latitude" : [NSNumber numberWithFloat:latitude],
+                                                                                           @"longitude" : [NSNumber numberWithFloat:longitude],
+                                                                                           @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
+                                                                                           @"deviceFamily" : deviceFamily,
+                                                                                           @"deviceName" : deviceName,
+                                                                                           @"deviceOs" : deviceOS,
+                                                                                           @"domain" : domain,
+                                                                                           @"appName" : appName,
+                                                                                           @"appVersion" : appVersion,
+                                                                                           @"isStreaming" : streaming ? @"true" : @"false",
+                                                                                           @"mediaViewTimeInSeconds" : [NSString stringWithFormat:@"%f",seconds],
+                                                                                           @"mediaEngagementOver75Percent" : mediaEngagementOver75Percent ? @"true" : @"false",
+                                                                                           @"deviceType" : deviceType
+                                                                                           }];
+    
     NSString *mediaComponentId;
     NSString *languageId;
     if (extraParams)
@@ -198,14 +208,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         {
             [eventDictionary setObject:extraParams[@"subtitleLanguageId"] forKey:@"subtitleLanguageId"];
         }
-      
+        
         if (extraParams[@"mediaComponentId"] && extraParams[@"languageId"])
         {
-          mediaComponentId = extraParams[@"mediaComponentId"];
-          languageId = extraParams[@"languageId"];
+            mediaComponentId = extraParams[@"mediaComponentId"];
+            languageId = extraParams[@"languageId"];
         }
     }
-  
+    
     if (refID)
     {
         [eventDictionary setObject:refID forKey:@"refId"];
@@ -220,7 +230,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
         [[EventTracker sharedInstance] logMessage: @"Error: Event tracker refId or mediaComponentId and languageId not set. Tracking events will not be logged."];
         return;
     }
-  
+    
+    if (customParams) {
+        eventDictionary[@"custom"] = customParams;
+    }
+    
     JFMEvent *event = [JFMEvent new];
     event.hasLocationData = hasLocationData;
     event.event_id = 0;
@@ -236,11 +250,6 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     [[EventTracker sharedInstance] syncEvents];
 }
 
-+ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
-{
-    [self trackPlayEventWithRefID:refID apiSessionID:apiSessionID streaming:streaming mediaViewTimeInSeconds:seconds mediaEngagementOver75Percent:mediaEngagementOver75Percent extraParams:nil];
-}
-
 + (void) trackShareEventFromShareMethod:(NSString *) shareMethod
                                   refID:(NSString *) refID
                            apiSessionID:(NSString *) apiSessionID
@@ -252,6 +261,14 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                   refID:(NSString *) refID
                            apiSessionID:(NSString *) apiSessionID
                             extraParams:(NSDictionary *)extraParams
+{
+    [self trackShareEventFromShareMethod:shareMethod refID:refID apiSessionID:apiSessionID extraParams:extraParams customParams:nil];
+}
+
++ (void) trackShareEventFromShareMethod:(NSString *) shareMethod
+                                  refID:(NSString *) refID
+                           apiSessionID:(NSString *) apiSessionID
+                            extraParams:(NSDictionary *)extraParams customParams: (NSDictionary*)customParams
 {
     if(![[EventTracker sharedInstance] apiKey])
     {
@@ -278,47 +295,52 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     NSString *deviceType =  UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad ? @"tablet" : @"handheld";
     
     NSMutableDictionary *eventDictionary = [NSMutableDictionary dictionaryWithDictionary:@{
-                                      @"timestamp" : [NSNumber numberWithLongLong:timestamp],
-                                      @"uuid" : eventUUID,
-                                      @"type" : type,
-                                      @"latitude" : [NSNumber numberWithFloat:latitude],
-                                      @"longitude" : [NSNumber numberWithFloat:longitude],
-                                      @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
-                                      @"deviceFamily" : deviceFamily,
-                                      @"deviceName" : deviceName,
-                                      @"deviceOs" : deviceOS,
-                                      @"appName" : appName,
-                                      @"appVersion" : appVersion,
-                                      @"shareMethod" : shareMethod,
-                                      @"deviceType" : deviceType
-                                      }];
-  NSString *mediaComponentId;
-  NSString *languageId;
-  if (extraParams)
-  {
-      if (extraParams[@"mediaComponentId"] && extraParams[@"languageId"])
-      {
-        mediaComponentId = extraParams[@"mediaComponentId"];
-        languageId = extraParams[@"languageId"];
-      }
-  }
-  
-  if (refID)
-  {
-      [eventDictionary setObject:refID forKey:@"refId"];
-  }
-  else if (mediaComponentId && languageId)
-  {
-      [eventDictionary setObject:mediaComponentId forKey:@"mediaComponentId"];
-      [eventDictionary setObject:languageId forKey:@"languageId"];
-  }
-  else
-  {
-      [[EventTracker sharedInstance] logMessage: @"Error: Event tracker refId or mediaComponentId and languageId not set. Tracking events will not be logged."];
-      return;
-  }
-  
-  [[EventTracker sharedInstance] postSharedEvent:eventDictionary];
+                                                                                           @"timestamp" : [NSNumber numberWithLongLong:timestamp],
+                                                                                           @"uuid" : eventUUID,
+                                                                                           @"type" : type,
+                                                                                           @"latitude" : [NSNumber numberWithFloat:latitude],
+                                                                                           @"longitude" : [NSNumber numberWithFloat:longitude],
+                                                                                           @"apiSessionId" : apiSessionID ? apiSessionID : @"N/A",
+                                                                                           @"deviceFamily" : deviceFamily,
+                                                                                           @"deviceName" : deviceName,
+                                                                                           @"deviceOs" : deviceOS,
+                                                                                           @"appName" : appName,
+                                                                                           @"appVersion" : appVersion,
+                                                                                           @"shareMethod" : shareMethod,
+                                                                                           @"deviceType" : deviceType
+                                                                                           }];
+    NSString *mediaComponentId;
+    NSString *languageId;
+    if (extraParams)
+    {
+        if (extraParams[@"mediaComponentId"] && extraParams[@"languageId"])
+        {
+            mediaComponentId = extraParams[@"mediaComponentId"];
+            languageId = extraParams[@"languageId"];
+        }
+    }
+    
+    if (refID)
+    {
+        [eventDictionary setObject:refID forKey:@"refId"];
+    }
+    else if (mediaComponentId && languageId)
+    {
+        [eventDictionary setObject:mediaComponentId forKey:@"mediaComponentId"];
+        [eventDictionary setObject:languageId forKey:@"languageId"];
+    }
+    else
+    {
+        [[EventTracker sharedInstance] logMessage: @"Error: Event tracker refId or mediaComponentId and languageId not set. Tracking events will not be logged."];
+        return;
+    }
+    
+    if (customParams) {
+        eventDictionary[@"custom"] = customParams;
+    }
+    
+    
+    [[EventTracker sharedInstance] postSharedEvent:eventDictionary];
 }
 
 #pragma mark - Reachability setup

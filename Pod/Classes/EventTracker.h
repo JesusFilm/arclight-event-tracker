@@ -70,6 +70,10 @@ extern NSString * const kShareMethodEmbedURL;
  */
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent extraParams:(NSDictionary *)extraParams;
 
+
++ (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent extraParams:(NSDictionary *)extraParams customParams:(NSDictionary *)customParams;
+
+
 /**
  * This method is used to track a share event. It;s meant to be called when a user shares a video.
  *
