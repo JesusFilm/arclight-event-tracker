@@ -731,7 +731,9 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
                                                         httpResp.statusCode == 598 ||
                                                         httpResp.statusCode == 599)
                                                      {
-                                                         recoverable = YES;
+                                                       recoverable = YES;
+                                                     } else if (httpResp == nil) {
+                                                       recoverable = YES;
                                                      }
                                                      
                                                      webError = [NSError errorWithDomain:@"com.arclight" code:(long)httpResp.statusCode userInfo:@{}];
