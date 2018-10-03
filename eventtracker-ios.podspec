@@ -1,5 +1,4 @@
-#
-# Be sure to run `pod lib lint eventtracker-ios.podspec' to ensure this is a
+# # Be sure to run `pod lib lint eventtracker-ios.podspec' to ensure this is a
 # valid spec and remove all comments before submitting the spec.
 #
 # Any lines starting with a # are optional, but encouraged
@@ -9,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "eventtracker-ios"
-  s.version          = "1.9.93"
+  s.version          = "1.9.94"
   s.summary          = "Arclight engagement tracker for iOS"
   s.description      = "Arclight engagement tracker for iOS for logging engagements"
   s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
@@ -21,9 +20,9 @@ Pod::Spec.new do |s|
   s.requires_arc = true
 
   s.source_files = 'Pod/Classes'
-  s.resource_bundles = {
-    'eventtracker-ios' => ['Pod/Assets/*.png']
-  }
+ # s.resource_bundles = {
+ #   'eventtracker-ios' => ['Pod/Assets/*.png']
+ # }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'MapKit', 'CoreData'
