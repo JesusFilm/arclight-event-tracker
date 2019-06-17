@@ -35,8 +35,19 @@ extern NSString * const kShareMethodEmbedURL;
  *  @param appName    The name of your application
  *  @param appVersion The version of your application
  */
-+ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion;
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion __deprecated;
 
+
+/**
+ *  Configures the tracker for the given application.
+ *
+ *  @param apiKey     Your application's API key
+ *  @param appDomain  the domain of the application (ie com.companynae). This should be your bundle identifier
+ *  @param appName    The name of your application
+ *  @param appVersion The version of your application
+ *  @param isProduction Bool saying if the application is pointed to the production urls or not.
+ */
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd;
 /**
  * This method should be called when the application resumes from the background.  It performs another check to
  * see if the user's location changed.

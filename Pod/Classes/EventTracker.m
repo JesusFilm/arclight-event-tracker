@@ -27,7 +27,7 @@ NSString * const kShareMethodEmbedURL = @"Embed URL Copy";
 
 
 #ifdef DEBUG
-static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
+static NSString * const kApiBaseUrl = @"http://staging-analytics.arclight.org";
 #else
 static NSString * const kApiBaseUrl = @"https://analytics.arclight.org";
 #endif
@@ -73,6 +73,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 @property(assign) BOOL loggingEnabled;
 @property(nonatomic, strong) JFMReachability *hostReachability;
 @property(nonatomic, assign) UIBackgroundTaskIdentifier syncTaskID;
+@property(nonatomic, strong) NSString *baseUrl;
 @end
 
 @implementation EventTracker
@@ -113,10 +114,19 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 #pragma mark - Public methods
 + (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion
 {
-    [[EventTracker sharedInstance] setApiKey:apiKey];
-    [[EventTracker sharedInstance] setAppDomain:appDomain];
-    [[EventTracker sharedInstance] setAppName:appName];
-    [[EventTracker sharedInstance] setAppVersion:appVersion];
+  [self initializeWithApiKey:apiKey appDomain:appDomain appName:appName appVersion:appVersion isProduction:true];
+}
+
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd {
+  [[EventTracker sharedInstance] setApiKey:apiKey];
+  [[EventTracker sharedInstance] setAppDomain:appDomain];
+  [[EventTracker sharedInstance] setAppName:appName];
+  [[EventTracker sharedInstance] setAppVersion:appVersion];
+  if (isProd) {
+    [[EventTracker sharedInstance] setBaseUrl:@"https://analytics.arclight.org"];
+  } else {
+    [[EventTracker sharedInstance] setBaseUrl:@"http://staging-analytics.arclight.org"];
+  }
 }
 
 + (void) applicationDidBecomeActive
@@ -676,8 +686,9 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
             NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
             
             [self logMessage: [NSString stringWithFormat: @"postData.body(JSON) == %@", jsonString]];
-            
-            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@",kApiBaseUrl,kApiPlayEndpoint,[[EventTracker sharedInstance] apiKey]]];
+          
+            NSString *bUrl = ([[EventTracker sharedInstance] baseUrl] != 0) ? [[EventTracker sharedInstance] baseUrl] : kApiBaseUrl;
+            NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@", bUrl, kApiPlayEndpoint,[[EventTracker sharedInstance] apiKey]]];
             
             [self logMessage: [NSString stringWithFormat: @"using url %@", url]];
             
@@ -796,8 +807,10 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     NSString *jsonString = [[NSString alloc] initWithData:postData encoding:NSUTF8StringEncoding];
     NSData *jsonStringData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
     [self logMessage: [NSString stringWithFormat: @"postData.body(JSON) == %@", jsonString]];
-    
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@",kApiBaseUrl,kApiShareEndpoint,[[EventTracker sharedInstance] apiKey]]];
+  
+    NSString *bUrl = ([[EventTracker sharedInstance] baseUrl] != 0) ? [[EventTracker sharedInstance] baseUrl] : kApiBaseUrl;
+  
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@?apiKey=%@", bUrl, kApiShareEndpoint,[[EventTracker sharedInstance] apiKey]]];
 
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60.0f];
     
