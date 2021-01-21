@@ -93,8 +93,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     if(self = [super init])
     {
         [self createDB];
-        [self initLocationManager];
-        
+
         self.syncTaskID = UIBackgroundTaskInvalid;
         
         /*
@@ -127,6 +126,28 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
   } else {
     [[EventTracker sharedInstance] setBaseUrl:@"http://staging-analytics.arclight.org"];
   }
+  [[EventTracker sharedInstance] initLocationManager];
+}
+
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd latitude:(float)latitude longitude:(float)longitude {
+  [[EventTracker sharedInstance] setApiKey:apiKey];
+  [[EventTracker sharedInstance] setAppDomain:appDomain];
+  [[EventTracker sharedInstance] setAppName:appName];
+  [[EventTracker sharedInstance] setAppVersion:appVersion];
+  if (isProd) {
+    [[EventTracker sharedInstance] setBaseUrl:@"https://analytics.arclight.org"];
+  } else {
+    [[EventTracker sharedInstance] setBaseUrl:@"http://staging-analytics.arclight.org"];
+  }
+  
+  if (latitude > 0 || longitude > 0) {
+    [self setLatitude:latitude longitude: longitude];
+  } else {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    float lastLat = [defaults floatForKey:kUserDefaultLastKnownLatitude];
+    float lastLong = [defaults floatForKey:kUserDefaultLastKnownLongitude];
+    [self setLatitude:lastLat longitude: lastLong];
+  }
 }
 
 + (void) applicationDidBecomeActive
@@ -139,6 +160,21 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 + (void) setLoggingEnabled: (BOOL)loggingEnabled
 {
     [EventTracker sharedInstance].loggingEnabled = loggingEnabled;
+}
+
++ (void) setLatitude:(float)latitude longitude:(float)longitude
+{
+  [EventTracker sharedInstance].latitude = latitude;
+  [EventTracker sharedInstance].longitude = longitude;
+  
+  // update the last known location
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setFloat:latitude forKey:kUserDefaultLastKnownLatitude];
+  [defaults setFloat:longitude forKey:kUserDefaultLastKnownLongitude];
+  [defaults synchronize];
+  
+  // Update any events with the new location in case they were recorded while offline
+  [[EventTracker sharedInstance] updateLocationForEvents];
 }
 
 + (void) trackPlayEventWithRefID:(NSString *) refID apiSessionID:(NSString *) apiSessionID streaming:(BOOL) streaming mediaViewTimeInSeconds:(float) seconds mediaEngagementOver75Percent:(BOOL) mediaEngagementOver75Percent
@@ -479,7 +515,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 /**
  * Inserts a new event into the database
  *
- * @params the event object to be inserted
+ * @param event the event object to be inserted
  * @return boolean as to whether or not the request completed
  */
 - (BOOL) insertEvent:(JFMEvent *) event
@@ -524,7 +560,6 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 
 /**
  * Updates the location for all events that are missing a location.
- * @return a boolean value as to whether the record was updated
  */
 - (void) updateLocationForEvents
 {
@@ -542,7 +577,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
 /**
  * Fetches all events from the database.
  *
- * @params withoutLocationData a boolean determining if we only want events with no location data
+ * @params withLocationData a boolean determining if we only want events with no location data
  * @return an array of event objects
  **/
 - (NSArray *) eventsIncludingWithLocationData: (BOOL)withLocationData
@@ -602,7 +637,11 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     self.locationManager = [[CLLocationManager alloc] init];
     self.locationManager.delegate = self;
     self.locationManager.distanceFilter = kCLDistanceFilterNone;
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    if (@available(iOS 14.0, *)) {
+      self.locationManager.desiredAccuracy = kCLLocationAccuracyReduced;
+    } else {
+      self.locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers;
+    }
     [self.locationManager startUpdatingLocation];
 }
 
@@ -610,8 +649,9 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
  * Delegate method for CLLocationManager fired when the user's location has been found. At this point,
  * we need to power down the GPS and store the location.
  */
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
-{
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+  if (locations.lastObject) {
+    CLLocation *newLocation = locations.lastObject;
     self.latitude = newLocation.coordinate.latitude;
     self.longitude = newLocation.coordinate.longitude;
     [self.locationManager stopUpdatingLocation];
@@ -624,6 +664,7 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
     
     // Update any events with the new location in case they were recorded while offline
     [self updateLocationForEvents];
+  }
 }
 
 /*

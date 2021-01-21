@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "eventtracker-ios"
-  s.version          = "1.9.95"
+  s.version          = "1.9.96"
   s.summary          = "Arclight engagement tracker for iOS"
   s.description      = "Arclight engagement tracker for iOS for logging engagements"
   s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
