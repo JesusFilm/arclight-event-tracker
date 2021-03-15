@@ -57,8 +57,9 @@ extern NSString * const kShareMethodEmbedURL;
  *  @param appName    The name of your application
  *  @param appVersion The version of your application
  *  @param isProd Bool saying if the application is pointed to the production urls or not.
+ *  @param trackLocation Bool saying if the application should track the user's location or not.
  */
-+ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd latitude:(float) latitude longitude:(float) longitude;
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd trackLocation:(BOOL) trackLocation;
 
 /**
  * This method should be called when the application resumes from the background.  It performs another check to

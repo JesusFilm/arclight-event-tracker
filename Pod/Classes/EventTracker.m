@@ -129,24 +129,24 @@ static NSString * const kUserDefaultLastKnownLongitude = @"kUserDefaultLastKnown
   [[EventTracker sharedInstance] initLocationManager];
 }
 
-+ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd latitude:(float)latitude longitude:(float)longitude {
-  [[EventTracker sharedInstance] setApiKey:apiKey];
-  [[EventTracker sharedInstance] setAppDomain:appDomain];
-  [[EventTracker sharedInstance] setAppName:appName];
-  [[EventTracker sharedInstance] setAppVersion:appVersion];
-  if (isProd) {
-    [[EventTracker sharedInstance] setBaseUrl:@"https://analytics.arclight.org"];
-  } else {
-    [[EventTracker sharedInstance] setBaseUrl:@"http://staging-analytics.arclight.org"];
-  }
-  
-  if (latitude > 0 || longitude > 0) {
-    [self setLatitude:latitude longitude: longitude];
-  } else {
++ (void) initializeWithApiKey:(NSString *) apiKey appDomain:(NSString *) appDomain appName:(NSString *) appName appVersion:(NSString *) appVersion isProduction:(BOOL) isProd trackLocation:(BOOL) trackLocation {
+  if (!trackLocation) {
+    [[EventTracker sharedInstance] setApiKey:apiKey];
+    [[EventTracker sharedInstance] setAppDomain:appDomain];
+    [[EventTracker sharedInstance] setAppName:appName];
+    [[EventTracker sharedInstance] setAppVersion:appVersion];
+    if (isProd) {
+      [[EventTracker sharedInstance] setBaseUrl:@"https://analytics.arclight.org"];
+    } else {
+      [[EventTracker sharedInstance] setBaseUrl:@"http://staging-analytics.arclight.org"];
+    }
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    float lastLat = [defaults floatForKey:kUserDefaultLastKnownLatitude];
-    float lastLong = [defaults floatForKey:kUserDefaultLastKnownLongitude];
+    float lastLat = ([defaults floatForKey:kUserDefaultLastKnownLatitude]) ? [defaults floatForKey:kUserDefaultLastKnownLatitude] : 0;
+    float lastLong = ([defaults floatForKey:kUserDefaultLastKnownLongitude]) ? [defaults floatForKey:kUserDefaultLastKnownLongitude] : 0;
     [self setLatitude:lastLat longitude: lastLong];
+  } else {
+    [self initializeWithApiKey:apiKey appDomain:appDomain appName:appName appVersion:appVersion isProduction:isProd];
   }
 }
 
