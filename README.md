@@ -10,13 +10,13 @@ To run the example project, clone the repo, and run `pod install` from the Examp
 
 ## Private Repo Configuration 
 
-eventracker-ios is available through the [arclight-cocoa-pods](https://bitbucket.org/arclight/arclight-cocoa-pods) Private Pods library. 
+eventracker-ios is available through the [arclight-cocoa-pods](https://bitbucket.org/jesusfilmmedia/arclight-cocoa-pods) Private Pods library. 
 
 To use the eventracker-ios pod you will need to add the arclight-cocoa-pods pods private repo to your cocoapods setup.
 
 To add the Private Repo to your CocoaPods installation, run the following:
 
-	pod repo add arclight-cocoa-pods https://bitbucket.org/arclight/arclight-cocoa-pods
+	pod repo add arclight-cocoa-pods https://bitbucket.org/jesusfilmmedia/arclight-cocoa-pods
 
 
 ## Install
@@ -26,7 +26,7 @@ it, simply add the following lines to your Podfile:
 
 at the top: 
 
-	source 'https://bitbucket.org/arclight/arclight-cocoa-pods'
+	source 'https://bitbucket.org/jesusfilmmedia/arclight-cocoa-pods'
 
 and with your other pods:
 
