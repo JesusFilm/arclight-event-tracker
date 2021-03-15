@@ -11,9 +11,9 @@ Pod::Spec.new do |s|
   s.version          = "1.9.96"
   s.summary          = "Arclight engagement tracker for iOS"
   s.description      = "Arclight engagement tracker for iOS for logging engagements"
-  s.homepage         = "https://bitbucket.org/arclight/eventtracker-ios"
+  s.homepage         = "https://bitbucket.org/jesusfilmmedia/eventtracker-ios"
   s.license          = 'Copyright MBSJ LLC'
-  s.source           = { :git => "https://bitbucket.org/arclight/eventtracker-ios.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://bitbucket.org/jesusfilmmedia/eventtracker-ios.git", :tag => s.version.to_s }
   s.author           = { "Arclight" => "Arclight" }
 
   s.platform     = :ios, '9.0'
