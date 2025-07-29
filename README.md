@@ -4,7 +4,7 @@ A CocoaPods library for tracking video play and share events for Arclight Videos
 
 ## Requirements
 
-- iOS 6.0+
+- iOS 12.0+
 - Xcode 8.0+
 - The following frameworks must be linked to your project:
   - `libsqlite3.0.dylib`
