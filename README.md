@@ -1,12 +1,6 @@
 # arclight-event-tracker
 
-A CocoaPods library for tracking video play and share events in iOS applications.
-
-## Usage
-
-To run the example project:
-
- clone the repo, and run `pod install` from the Example directory first.
+A CocoaPods library for tracking video play and share events for arclight videos in iOS applications.
 
 ## Requirements
 
@@ -148,3 +142,9 @@ Set custom location coordinates:
 ## Example
 
 See the `Example/` directory for a complete working example of how to integrate the EventTracker into your iOS application.
+
+## Development
+
+To run the example project:
+
+ clone the repo, and run `pod install` from the Example directory first.
