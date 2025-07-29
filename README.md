@@ -17,9 +17,9 @@ To install arclight-event-tracker, simply add the following line to your Podfile
 
 	pod 'arclight-event-tracker'
 
-If you would like to keep arclight-event-tracker updated you can simply include it like this in your podfile and "pod update" will always pull down the latest 1.8.x version. 
+If you would like to keep arclight-event-tracker updated you can simply include it like this in your podfile and "pod update" will always pull down the latest 1.20.x version. 
 
-	pod 'arclight-event-tracker', '~> 1.8.3'
+	pod 'arclight-event-tracker', '~> 1.20.0'
 
 ## How to Use
 
