@@ -1,6 +1,6 @@
 //
 //  ARCViewController.m
-//  eventtracker-ios
+//  arclight-event-tracker
 //
 //
 

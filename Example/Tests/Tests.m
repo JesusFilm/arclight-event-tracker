@@ -1,6 +1,6 @@
 //
-//  eventtracker-iosTests.m
-//  eventtracker-iosTests
+//  arclight-event-trackerTests.m
+//  arclight-event-trackerTests
 //
 //
 

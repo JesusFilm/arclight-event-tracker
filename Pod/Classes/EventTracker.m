@@ -7,7 +7,7 @@
 
 // builds the docs
 // run from the project directory
-// appledoc --project-name "eventtracker-ios" --project-company "com.test" --output "Docs" --keep-intermediate-files --ignore .m --ignore Reachability.h Engagement
+// appledoc --project-name "arclight-event-tracker" --project-company "com.test" --output "Docs" --keep-intermediate-files --ignore .m --ignore Reachability.h Engagement
 
 #import "EventTracker.h"
 #import <sqlite3.h>

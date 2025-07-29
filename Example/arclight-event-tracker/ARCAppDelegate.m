@@ -1,6 +1,6 @@
 //
 //  ARCAppDelegate.m
-//  eventtracker-ios
+//  arclight-event-tracker
 //
 //
 

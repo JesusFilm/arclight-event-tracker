@@ -1,6 +1,6 @@
 //
 //  ARCAppDelegate.h
-//  eventtracker-ios
+//  arclight-event-tracker
 //
 //  Created by CocoaPods on 10/08/2014.
 //
