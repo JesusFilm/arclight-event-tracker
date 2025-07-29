@@ -1,0 +1,63 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode.app
+      
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version-file: .ruby-version
+        bundler-cache: true
+        
+    - name: Install CocoaPods
+      run: |
+        gem install cocoapods
+        pod --version
+        
+    - name: Install dependencies
+      working-directory: Example
+      run: |
+        pod install --repo-update
+        
+    - name: Build project
+      working-directory: Example
+      run: |
+        xcodebuild clean build \
+          -workspace arclight-event-tracker.xcworkspace \
+          -scheme arclight-event-tracker \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+          -configuration Debug \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+          
+    - name: Run tests
+      working-directory: Example
+      run: |
+        xcodebuild test \
+          -workspace arclight-event-tracker.xcworkspace \
+          -scheme arclight-event-tracker \
+          -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+          -configuration Debug \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          -only-testing:Tests
+          
+    - name: Build podspec
+      run: |
+        pod lib lint arclight-event-tracker.podspec --allow-warnings --verbose 
