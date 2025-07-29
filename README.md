@@ -1,6 +1,6 @@
-# arclight-event-tracker
+# Arclight Event Tracker
 
-A CocoaPods library for tracking video play and share events for arclight videos in iOS applications.
+A CocoaPods library for tracking video play and share events for Arclight Videos in iOS applications.
 
 ## Requirements
 
