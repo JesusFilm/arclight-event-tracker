@@ -29,7 +29,7 @@ jobs:
     - name: Validate version matches tag
       run: |
         # Extract version from podspec
-        PODSPEC_VERSION=$(grep "s.version" arclight-event-tracker.podspec | sed 's/.*= "\(.*\)".*/\1/')
+        PODSPEC_VERSION=$(grep "s.version " arclight-event-tracker.podspec | sed -n "s/.*'\([^']*\)'.*/\1/p")
         # Extract version from git tag (remove 'v' prefix)
         GIT_TAG_VERSION=${GITHUB_REF#refs/tags/v}
         
