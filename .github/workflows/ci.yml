@@ -40,8 +40,8 @@ jobs:
       with:
         path: |
           Example/Pods
+          ~/.cocoapods/repos
           ~/Library/Caches/CocoaPods
-          ~/.cocoapods
         key: ${{ runner.os }}-pods-${{ hashFiles('**/Example/Podfile.lock') }}
         restore-keys: |
           ${{ runner.os }}-pods-

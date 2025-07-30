@@ -3,7 +3,7 @@ name: Release to CocoaPods
 on:
   push:
     tags:
-      - 'v*'
+      - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   release:
@@ -30,8 +30,8 @@ jobs:
       run: |
         # Extract version from podspec
         PODSPEC_VERSION=$(grep "s.version " arclight-event-tracker.podspec | sed -n "s/.*'\([^']*\)'.*/\1/p")
-        # Extract version from git tag (remove 'v' prefix)
-        GIT_TAG_VERSION=${GITHUB_REF#refs/tags/v}
+        # Extract version from git tag
+        GIT_TAG_VERSION=${GITHUB_REF#refs/tags/}
         
         echo "Podspec version: $PODSPEC_VERSION"
         echo "Git tag version: $GIT_TAG_VERSION"

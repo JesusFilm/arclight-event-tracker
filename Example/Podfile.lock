@@ -1,5 +1,5 @@
 PODS:
-  - arclight-event-tracker (1.2.0)
+  - arclight-event-tracker (1.20.0)
   - Expecta (1.0.6)
   - Specta (0.2.1)
 
@@ -18,10 +18,10 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  arclight-event-tracker: 6209f6c4fadbdedf042740842d9fe19579cc1b2c
+  arclight-event-tracker: 8977a0c2752ce22d23346209446b0bde9cf1c4dc
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   Specta: 15a276a6343867b426d5ed135d5aa4d04123a573
 
-PODFILE CHECKSUM: ee015490857f930d352467789e2b470768ed61f9
+PODFILE CHECKSUM: 6dcc0ebcf1284f36ee020a664a3fb7de057f82e4
 
 COCOAPODS: 1.16.2
