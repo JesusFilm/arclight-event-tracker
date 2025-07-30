@@ -30,8 +30,21 @@ jobs:
     - name: Run RuboCop
       run: |
         bundle exec rubocop
+
+    - name: Cache CocoaPods
+      id: cocoapods-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          Example/Pods
+          ~/Library/Caches/CocoaPods
+          ~/.cocoapods
+        key: ${{ runner.os }}-pods-${{ hashFiles('**/Example/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
         
     - name: Install dependencies
+      if: steps.cocoapods-cache.outputs.cache-hit != 'true'
       working-directory: Example
       run: |
         bundle exec pod install --repo-update
