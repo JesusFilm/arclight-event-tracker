@@ -3,12 +3,12 @@
 platform :ios, '12.0'
 
 target 'arclight-event-tracker' do
-  use_frameworks!
+  pod 'arclight-event-tracker', path: '../'
+end
 
+target 'Tests' do
   pod 'arclight-event-tracker', path: '../'
 
-  target 'Tests' do
-    pod 'Specta', '~> 0.2.1'
-    pod 'Expecta'
-  end
+  pod 'Specta', '~> 0.2.1'
+  pod 'Expecta'
 end

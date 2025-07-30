@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00F8C5AE0CA7CBD1491A1828 /* libPods-Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A23851BFFA326843BB64C89 /* libPods-Tests.a */; };
 		6003F58E195388D20070C39A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58D195388D20070C39A /* Foundation.framework */; };
 		6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F58F195388D20070C39A /* CoreGraphics.framework */; };
 		6003F592195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
@@ -22,8 +23,7 @@
 		6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6003F591195388D20070C39A /* UIKit.framework */; };
 		6003F5BA195388D20070C39A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003F5B8195388D20070C39A /* InfoPlist.strings */; };
 		6003F5BC195388D20070C39A /* Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6003F5BB195388D20070C39A /* Tests.m */; };
-		AA0F0A8207764AF95144A29D /* libPods-Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E6742C3E60E9F32CF646F606 /* libPods-Tests.a */; };
-		D799332B2FBE90FBE96703BC /* libPods-arclight-event-tracker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A689E0177F57167F295092E3 /* libPods-arclight-event-tracker.a */; };
+		9FF48969CE307A8BBAF77F75 /* libPods-arclight-event-tracker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A8AADE68A38B1851F3F12F89 /* libPods-arclight-event-tracker.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,11 +63,13 @@
 		6F43F0BE56CA2273E22E842F /* Pods-Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		7D273BE4C79941FF6949BA34 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		89F5A495560FD585C8D6B5BB /* Pods-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tests/Pods-Tests.release.xcconfig"; sourceTree = "<group>"; };
-		A689E0177F57167F295092E3 /* libPods-arclight-event-tracker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-arclight-event-tracker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		92E5F38F3AB2350357DEFEF1 /* Pods-arclight-event-tracker-Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-arclight-event-tracker-Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-arclight-event-tracker-Tests/Pods-arclight-event-tracker-Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		9A23851BFFA326843BB64C89 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A8AADE68A38B1851F3F12F89 /* libPods-arclight-event-tracker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-arclight-event-tracker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BBCF6CB3A15874BCAA80CA53 /* Pods-arclight-event-tracker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-arclight-event-tracker.release.xcconfig"; path = "Pods/Target Support Files/Pods-arclight-event-tracker/Pods-arclight-event-tracker.release.xcconfig"; sourceTree = "<group>"; };
 		C1B9B71D637108E42436B929 /* arclight-event-tracker.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = "arclight-event-tracker.podspec"; path = "../arclight-event-tracker.podspec"; sourceTree = "<group>"; };
+		C5371A6E17948064A3A5C15B /* Pods-arclight-event-tracker-Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-arclight-event-tracker-Tests.release.xcconfig"; path = "Pods/Target Support Files/Pods-arclight-event-tracker-Tests/Pods-arclight-event-tracker-Tests.release.xcconfig"; sourceTree = "<group>"; };
 		CB1EA65F19E70C1800AC662F /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
-		E6742C3E60E9F32CF646F606 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,7 +80,7 @@
 				6003F590195388D20070C39A /* CoreGraphics.framework in Frameworks */,
 				6003F592195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F58E195388D20070C39A /* Foundation.framework in Frameworks */,
-				D799332B2FBE90FBE96703BC /* libPods-arclight-event-tracker.a in Frameworks */,
+				9FF48969CE307A8BBAF77F75 /* libPods-arclight-event-tracker.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +91,7 @@
 				6003F5B0195388D20070C39A /* XCTest.framework in Frameworks */,
 				6003F5B2195388D20070C39A /* UIKit.framework in Frameworks */,
 				6003F5B1195388D20070C39A /* Foundation.framework in Frameworks */,
-				AA0F0A8207764AF95144A29D /* libPods-Tests.a in Frameworks */,
+				00F8C5AE0CA7CBD1491A1828 /* libPods-Tests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +105,8 @@
 				89F5A495560FD585C8D6B5BB /* Pods-Tests.release.xcconfig */,
 				24F2815E2A96336A1FCEE14D /* Pods-arclight-event-tracker.debug.xcconfig */,
 				BBCF6CB3A15874BCAA80CA53 /* Pods-arclight-event-tracker.release.xcconfig */,
+				92E5F38F3AB2350357DEFEF1 /* Pods-arclight-event-tracker-Tests.debug.xcconfig */,
+				C5371A6E17948064A3A5C15B /* Pods-arclight-event-tracker-Tests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -136,8 +140,8 @@
 				6003F58F195388D20070C39A /* CoreGraphics.framework */,
 				6003F591195388D20070C39A /* UIKit.framework */,
 				6003F5AF195388D20070C39A /* XCTest.framework */,
-				E6742C3E60E9F32CF646F606 /* libPods-Tests.a */,
-				A689E0177F57167F295092E3 /* libPods-arclight-event-tracker.a */,
+				9A23851BFFA326843BB64C89 /* libPods-Tests.a */,
+				A8AADE68A38B1851F3F12F89 /* libPods-arclight-event-tracker.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
