@@ -47,7 +47,7 @@ jobs:
       if: steps.cocoapods-cache.outputs.cache-hit != 'true'
       working-directory: Example
       run: |
-        bundle exec pod install --repo-update
+        bundle exec pod install
         
     - name: List available simulators
       run: xcrun simctl list devices available
