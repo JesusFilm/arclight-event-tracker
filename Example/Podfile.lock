@@ -9,7 +9,7 @@ DEPENDENCIES:
   - Specta (~> 0.2.1)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  trunk:
     - Expecta
     - Specta
 
@@ -22,6 +22,6 @@ SPEC CHECKSUMS:
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   Specta: 15a276a6343867b426d5ed135d5aa4d04123a573
 
-PODFILE CHECKSUM: 6dcc0ebcf1284f36ee020a664a3fb7de057f82e4
+PODFILE CHECKSUM: b2bddeab5da08cb59351a06817e974f2f31be084
 
 COCOAPODS: 1.16.2

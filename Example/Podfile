@@ -1,16 +1,14 @@
 # frozen_string_literal: true
 
-source 'https://github.com/CocoaPods/Specs.git'
-
 platform :ios, '12.0'
 
 target 'arclight-event-tracker' do
-  pod 'arclight-event-tracker', path: '../'
-end
+  use_frameworks!
 
-target 'Tests' do
   pod 'arclight-event-tracker', path: '../'
 
-  pod 'Specta', '~> 0.2.1'
-  pod 'Expecta'
+  target 'Tests' do
+    pod 'Specta', '~> 0.2.1'
+    pod 'Expecta'
+  end
 end
