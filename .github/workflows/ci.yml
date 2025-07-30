@@ -86,4 +86,4 @@ jobs:
           
     - name: Build podspec
       run: |
-        bundle execpod lib lint arclight-event-tracker.podspec --allow-warnings --verbose 
+        bundle exec pod lib lint arclight-event-tracker.podspec --allow-warnings --verbose 
