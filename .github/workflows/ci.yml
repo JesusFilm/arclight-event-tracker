@@ -37,13 +37,16 @@ jobs:
       run: |
         pod install --repo-update
         
+    - name: List available simulators
+      run: xcrun simctl list devices available
+      
     - name: Build project
       working-directory: Example
       run: |
         xcodebuild clean build \
           -workspace arclight-event-tracker.xcworkspace \
           -scheme arclight-event-tracker \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
           -configuration Debug \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
@@ -55,7 +58,7 @@ jobs:
         xcodebuild test \
           -workspace arclight-event-tracker.xcworkspace \
           -scheme arclight-event-tracker \
-          -destination 'platform=iOS Simulator,name=iPhone 14,OS=latest' \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
           -configuration Debug \
           CODE_SIGN_IDENTITY="" \
           CODE_SIGNING_REQUIRED=NO \
