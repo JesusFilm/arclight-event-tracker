@@ -148,3 +148,75 @@ See the `Example/` directory for a complete working example of how to integrate 
 To run the example project:
 
  clone the repo, and run `pod install` from the Example directory first.
+
+## Releasing
+
+This project uses automated releases via GitHub Actions. To release a new version:
+
+### 1. Update Version
+
+Update the version in `arclight-event-tracker.podspec`:
+
+```ruby
+s.version = "1.20.1"  # Change to your new version
+```
+
+### 2. Update Changelog (Optional)
+
+Document your changes in `CHANGELOG.md` file or update the release notes.
+
+### 3. Commit and Tag
+
+```bash
+# Add your changes
+git add .
+
+# Commit with a descriptive message
+git commit -m "Release v1.20.1"
+
+# Create and push the tag
+git tag v1.20.1
+git push origin main
+git push origin v1.20.1
+```
+
+### 4. Automated Release
+
+Once you push the tag, GitHub Actions will automatically:
+
+- ✅ Validate that the podspec version matches the git tag
+- ✅ Run RuboCop to check code style
+- ✅ Validate the podspec with `pod lib lint`
+- ✅ Publish to CocoaPods Trunk
+
+### 5. Verify Release
+
+Check that your release was successful:
+
+- **GitHub Actions**: Check the Actions tab for successful completion
+- **CocoaPods**: Verify the new version appears on [CocoaPods.org](https://cocoapods.org/?q=arclight-event-tracker)
+
+### Prerequisites
+
+Before releasing, ensure you have:
+
+1. **Valid Podspec**: Your podspec should pass `pod lib lint` locally
+2. **Clean Code**: All RuboCop checks should pass
+
+> **Note**: CocoaPods Trunk Token is already configured as a GitHub secret.
+
+### Version Guidelines
+
+- Use [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`
+- **MAJOR**: Breaking changes
+- **MINOR**: New features, backward compatible
+- **PATCH**: Bug fixes, backward compatible
+
+### Troubleshooting
+
+If the release fails:
+
+1. **Check GitHub Actions logs** for specific error messages
+2. **Verify podspec syntax** by running `pod lib lint` locally
+3. **Ensure version consistency** between podspec and git tag
+4. **Check CocoaPods Trunk Token** is properly configured
