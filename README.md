@@ -260,9 +260,9 @@ git add .
 git commit -m "Release v1.20.1"
 
 # Create and push the tag
-git tag v1.20.1
+git tag 1.20.1
 git push origin main
-git push origin v1.20.1
+git push origin 1.20.1
 ```
 
 ### 4. Automated Release
