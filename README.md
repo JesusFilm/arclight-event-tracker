@@ -78,7 +78,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 ```
-```
 
 **Parameters:**
 - `apiKey`: Your application's API key
