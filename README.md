@@ -25,14 +25,19 @@ If you would like to keep arclight-event-tracker updated you can simply include 
 
 ### 1. Import the Header
 
+**Objective-C:**
 ```objc
 #import "EventTracker.h"
 ```
 
+**Swift:**
+```swift
+import arclight_event_tracker
+```
+
 ### 2. Initialize the Tracker
 
-In your `AppDelegate.m`, initialize the tracker with your API key and app information:
-
+**Objective-C (AppDelegate.m):**
 ```objc
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -50,6 +55,31 @@ In your `AppDelegate.m`, initialize the tracker with your API key and app inform
 }
 ```
 
+**Swift (AppDelegate.swift):**
+```swift
+import UIKit
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        let appVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+        
+        // Initialize tracker
+        EventTracker.initialize(withApiKey: "YOUR_API_KEY",
+                              appDomain: "com.yourcompany.appname",
+                              appName: "Your App Name",
+                              appVersion: appVersionString,
+                              isProduction: true,
+                              trackLocation: true)
+        
+        return true
+    }
+}
+```
+```
+
 **Parameters:**
 - `apiKey`: Your application's API key
 - `appDomain`: Your app's bundle identifier (e.g., "com.companyname.appname")
@@ -62,6 +92,7 @@ In your `AppDelegate.m`, initialize the tracker with your API key and app inform
 
 Call this method when a user plays a video:
 
+**Objective-C:**
 ```objc
 [EventTracker trackPlayEventWithRefID:@"video_id_123"
                          apiSessionID:@"session_id_456"
@@ -70,17 +101,27 @@ Call this method when a user plays a video:
          mediaEngagementOver75Percent:YES];
 ```
 
+**Swift:**
+```swift
+EventTracker.trackPlayEvent(withRefID: "video_id_123",
+                           apiSessionID: "session_id_456",
+                           streaming: true,
+                           mediaViewTimeInSeconds: 120.0,
+                           mediaEngagementOver75Percent: true)
+```
+
 **Parameters:**
 - `refID`: The unique identifier of the video being played
 - `apiSessionID`: Session ID retrieved from your server for tracking playback sessions
-- `streaming`: `YES` if video is streamed from web, `NO` if played from cache
+- `streaming`: `true`/`YES` if video is streamed from web, `false`/`NO` if played from cache
 - `mediaViewTimeInSeconds`: Number of seconds the video was viewed
-- `mediaEngagementOver75Percent`: `YES` if video was played over 75%, `NO` otherwise
+- `mediaEngagementOver75Percent`: `true`/`YES` if video was played over 75%, `false`/`NO` otherwise
 
 ### 4. Track Play Events with Extra Parameters
 
 For more detailed tracking, you can include additional parameters:
 
+**Objective-C:**
 ```objc
 NSDictionary *extraParams = @{
     @"appScreen": @"VideoPlayerScreen",
@@ -97,27 +138,53 @@ NSDictionary *extraParams = @{
                           extraParams:extraParams];
 ```
 
+**Swift:**
+```swift
+let extraParams: [String: Any] = [
+    "appScreen": "VideoPlayerScreen",
+    "subtitleLanguageId": "en",
+    "mediaComponentId": "component_123",
+    "languageId": "en"
+]
+
+EventTracker.trackPlayEvent(withRefID: "video_id_123",
+                           apiSessionID: "session_id_456",
+                           streaming: true,
+                           mediaViewTimeInSeconds: 120.0,
+                           mediaEngagementOver75Percent: true,
+                           extraParams: extraParams)
+```
+
 ### 5. Track Share Events
 
 Track when users share videos:
 
+**Objective-C:**
 ```objc
 [EventTracker trackShareEventFromShareMethod:kShareMethodFacebook
                                       refID:@"video_id_123"
                                apiSessionID:@"session_id_456"];
 ```
 
+**Swift:**
+```swift
+EventTracker.trackShareEvent(fromShareMethod: .facebook,
+                             refID: "video_id_123",
+                             apiSessionID: "session_id_456")
+```
+
 **Available Share Methods:**
-- `kShareMethodTwitter` - Twitter sharing
-- `kShareMethodEmail` - Email sharing
-- `kShareMethodFacebook` - Facebook sharing
-- `kShareMethodBlueTooth3GP` - Bluetooth 3GP sharing
-- `kShareMethodEmbedURL` - Embed URL copying
+- `kShareMethodTwitter` / `.twitter` - Twitter sharing
+- `kShareMethodEmail` / `.email` - Email sharing
+- `kShareMethodFacebook` / `.facebook` - Facebook sharing
+- `kShareMethodBlueTooth3GP` / `.blueTooth3GP` - Bluetooth 3GP sharing
+- `kShareMethodEmbedURL` / `.embedURL` - Embed URL copying
 
 ### 6. Handle App Lifecycle
 
 Call this method when your app becomes active to check for location changes:
 
+**Objective-C (AppDelegate.m):**
 ```objc
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
@@ -125,18 +192,37 @@ Call this method when your app becomes active to check for location changes:
 }
 ```
 
+**Swift (AppDelegate.swift):**
+```swift
+func applicationDidBecomeActive(_ application: UIApplication) {
+    EventTracker.applicationDidBecomeActive()
+}
+```
+
 ### 7. Optional Configuration
 
 Enable logging for debugging:
 
+**Objective-C:**
 ```objc
 [EventTracker setLoggingEnabled:YES];
 ```
 
+**Swift:**
+```swift
+EventTracker.setLoggingEnabled(true)
+```
+
 Set custom location coordinates:
 
+**Objective-C:**
 ```objc
 [EventTracker setLatitude:37.7749 longitude:-122.4194];
+```
+
+**Swift:**
+```swift
+EventTracker.setLatitude(37.7749, longitude: -122.4194)
 ```
 
 ## Example
