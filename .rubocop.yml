@@ -1,0 +1,6 @@
+AllCops:
+  NewCops: enable
+
+Naming/FileName:
+  Exclude:
+    - 'arclight-event-tracker.podspec'

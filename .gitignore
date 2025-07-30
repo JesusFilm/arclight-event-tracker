@@ -32,5 +32,3 @@ DerivedData
 Example/Pods/
 Pods/
 Example/engagement-ios.xcworkspace
-
-Podfile.lock

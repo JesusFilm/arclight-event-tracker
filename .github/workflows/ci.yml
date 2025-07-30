@@ -27,15 +27,14 @@ jobs:
         ruby-version: ${{ steps.ruby-version.outputs.version }}
         bundler-cache: true
         
-    - name: Install CocoaPods
+    - name: Run RuboCop
       run: |
-        gem install cocoapods
-        pod --version
+        bundle exec rubocop
         
     - name: Install dependencies
       working-directory: Example
       run: |
-        pod install --repo-update
+        bundle exec pod install --repo-update
         
     - name: List available simulators
       run: xcrun simctl list devices available
@@ -71,4 +70,4 @@ jobs:
           
     - name: Build podspec
       run: |
-        pod lib lint arclight-event-tracker.podspec --allow-warnings --verbose 
+        bundle execpod lib lint arclight-event-tracker.podspec --allow-warnings --verbose 

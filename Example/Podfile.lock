@@ -1,0 +1,27 @@
+PODS:
+  - arclight-event-tracker (1.2.0)
+  - Expecta (1.0.6)
+  - Specta (0.2.1)
+
+DEPENDENCIES:
+  - arclight-event-tracker (from `../`)
+  - Expecta
+  - Specta (~> 0.2.1)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - Expecta
+    - Specta
+
+EXTERNAL SOURCES:
+  arclight-event-tracker:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  arclight-event-tracker: 6209f6c4fadbdedf042740842d9fe19579cc1b2c
+  Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
+  Specta: 15a276a6343867b426d5ed135d5aa4d04123a573
+
+PODFILE CHECKSUM: ee015490857f930d352467789e2b470768ed61f9
+
+COCOAPODS: 1.16.2
