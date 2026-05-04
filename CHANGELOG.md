@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] - 2026-05-04
+
+### Added
+- **Swift Package Manager support**: Repository now ships a `Package.swift` manifest exposing `arclight_event_tracker` as an SPM library product (iOS 12+). Existing CocoaPods consumers are unchanged; SPM consumers can now add the package via `https://github.com/JesusFilm/arclight-event-tracker.git`.
+
+### Notes
+- Single Objective-C target (`arclight_event_tracker`) at `Pod/Classes`. `EventTracker.h` and `JFMReachability.h` are exposed as public headers via SPM's umbrella header convention.
+- Frameworks linked: UIKit, CoreData, MapKit, CoreLocation. Library: `sqlite3`.
+- Required by [JesusFilm-iOS JAPP-232](https://linear.app/jesus-film-project/issue/JAPP-232) (CocoaPods → SPM migration).
+
 ## [1.20.0] - 2025-07-29
 
 ### Changed
