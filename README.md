@@ -13,13 +13,36 @@ A CocoaPods library for tracking video play and share events for Arclight Videos
 
 ## Install
 
+### CocoaPods
+
 To install arclight-event-tracker, simply add the following line to your Podfile:
 
 	pod 'arclight-event-tracker'
 
-If you would like to keep arclight-event-tracker updated you can simply include it like this in your podfile and "pod update" will always pull down the latest 1.20.x version. 
+If you would like to keep arclight-event-tracker updated you can simply include it like this in your podfile and "pod update" will always pull down the latest 1.21.x version.
 
-	pod 'arclight-event-tracker', '~> 1.20.0'
+	pod 'arclight-event-tracker', '~> 1.21.0'
+
+### Swift Package Manager
+
+Add the package to your `Package.swift`:
+
+```swift
+.package(url: "https://github.com/JesusFilm/arclight-event-tracker.git", from: "1.21.0")
+```
+
+Then add `arclight_event_tracker` as a dependency of your target:
+
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: [
+        .product(name: "arclight_event_tracker", package: "arclight-event-tracker")
+    ]
+)
+```
+
+In Xcode, use **File → Add Package Dependencies...** and enter the repository URL above.
 
 ## How to Use
 

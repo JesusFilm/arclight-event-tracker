@@ -19,7 +19,12 @@ jobs:
       
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode.app
-      
+
+    - name: Validate Package.swift manifest
+      run: |
+        swift package describe --type json > /dev/null
+        echo "Package.swift parses cleanly; SPM target resolves."
+
     - name: Get Ruby version
       id: ruby-version
       run: echo "version=$(cat .ruby-version)" >> $GITHUB_OUTPUT
